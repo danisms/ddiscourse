@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/ExternalLogins"
+@page "/Account/Manage/ExternalLogins"
 
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
@@ -12,54 +12,42 @@
 <PageTitle>Manage your external logins</PageTitle>
 
 <StatusMessage />
+
 @if (currentLogins?.Count > 0)
 {
-    <h3>Registered Logins</h3>
-    <table class="table">
-        <tbody>
-            @foreach (var login in currentLogins)
-            {
-                <tr>
-                    <td>@login.ProviderDisplayName</td>
-                    <td>
-                        @if (showRemoveButton)
-                        {
-                            <form @formname="@($"remove-login-{login.LoginProvider}")" @onsubmit="OnSubmitAsync" method="post">
-                                <AntiforgeryToken />
-                                <div>
-                                    <input type="hidden" name="@nameof(LoginProvider)" value="@login.LoginProvider" />
-                                    <input type="hidden" name="@nameof(ProviderKey)" value="@login.ProviderKey" />
-                                    <button type="submit" class="btn btn-primary" title="Remove this @login.ProviderDisplayName login from your account">Remove</button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            @: &nbsp;
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card card-pad">
+        <h2 class="card-title">Registered logins</h2>
+        @foreach (var login in currentLogins)
+        {
+            <div class="list-row">
+                <span class="grow">@login.ProviderDisplayName</span>
+                @if (showRemoveButton)
+                {
+                    <form @formname="@($"remove-login-{login.LoginProvider}")" @onsubmit="OnSubmitAsync" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="@nameof(LoginProvider)" value="@login.LoginProvider" />
+                        <input type="hidden" name="@nameof(ProviderKey)" value="@login.ProviderKey" />
+                        <button type="submit" class="btn btn-outline btn-sm" title="Remove this @login.ProviderDisplayName login from your account">Remove</button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
 }
 @if (otherLogins?.Count > 0)
 {
-    <h4>Add another service to log in.</h4>
-    <hr />
-    <form class="form-horizontal" action="Account/Manage/LinkExternalLogin" method="post">
-        <AntiforgeryToken />
-        <div>
-            <p>
+    <div class="card card-pad stack">
+        <h2 class="card-title">Add another service to log in</h2>
+        <form action="Account/Manage/LinkExternalLogin" method="post">
+            <AntiforgeryToken />
+            <div class="row wrap">
                 @foreach (var provider in otherLogins)
                 {
-                    <button type="submit" class="btn btn-primary" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
-                        @provider.DisplayName
-                    </button>
+                    <button type="submit" class="btn btn-outline" name="Provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
                 }
-            </p>
-        </div>
-    </form>
+            </div>
+        </form>
+    </div>
 }
 
 @code {

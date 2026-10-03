@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage"
+@page "/Account/Manage"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
@@ -10,27 +10,42 @@
 
 <PageTitle>Profile</PageTitle>
 
-<h3>Profile</h3>
 <StatusMessage />
 
-<div class="row">
-    <div class="col-xl-6">
-        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+@if (user is not null)
+{
+    <div class="card card-pad stack">
+        <h2 class="card-title">Profile</h2>
+        <dl class="info-list">
+            <dt>Name</dt><dd>@user.FullName</dd>
+            <dt>Username</dt><dd>@username</dd>
+            <dt>Email</dt><dd>@user.Email</dd>
+            <dt>Role</dt><dd>@UserDisplay.Role(HttpContext.User)</dd>
+        </dl>
+
+        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post" class="stack">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <input type="text" value="@username" id="username" class="form-control" placeholder="Choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+            <div class="field">
+                <label for="phone">Phone number</label>
+                <InputText id="phone" type="tel" class="input" @bind-Value="Input.PhoneNumber" autocomplete="tel" />
+                <ValidationMessage For="() => Input.PhoneNumber" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" id="Input.PhoneNumber" class="form-control" placeholder="Enter your phone number" />
-                <label for="Input.PhoneNumber" class="form-label">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+            <div class="row wrap">
+                <button type="submit" class="btn">Save</button>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
+
+        <div class="row wrap">
+            <SignOutButton Class="btn btn-outline" />
+        </div>
     </div>
-</div>
+
+    <div class="card card-pad danger-zone">
+        <h2>Delete account</h2>
+        <p class="muted" style="margin: 4px 0 14px">This permanently removes your account and everything you have posted. This cannot be undone.</p>
+        <a class="btn btn-danger" href="Account/Manage/DeletePersonalData">Delete account</a>
+    </div>
+}
 
 @code {
     private ApplicationUser? user;

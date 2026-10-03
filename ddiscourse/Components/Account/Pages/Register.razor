@@ -1,58 +1,85 @@
 ﻿@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
 @using ddiscourse.Data
 
 @inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Create account</PageTitle>
 
-<h1>Register</h1>
+<div class="card auth-card">
+    <div class="auth-tabs">
+        <a
+            href="@NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl })">Sign
+            in</a>
+            <a class="active"
+               href="@NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl })">Create
+                account</a>
+            </div>
 
-<div class="row">
-    <div class="col-lg-6">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="stack">
+                <DataAnnotationsValidator />
+
+                @if (Message is not null)
+                {
+                    <div class="alert alert-error" role="alert">@Message</div>
+                }
+
+                <div class="field">
+                    <label for="firstName">First name</label>
+                    <InputText id="firstName" class="input" @bind-Value="Input.FirstName" autocomplete="given-name"
+                               aria-required="true" />
+                    <ValidationMessage For="() => Input.FirstName" />
+                </div>
+
+                <div class="field">
+                    <label for="lastName">Last name</label>
+                    <InputText id="lastName" class="input" @bind-Value="Input.LastName" autocomplete="family-name"
+                               aria-required="true" />
+                    <ValidationMessage For="() => Input.LastName" />
+                </div>
+
+                <div class="field">
+                    <label for="username">Username</label>
+                    <InputText id="username" class="input" @bind-Value="Input.Username" autocomplete="username"
+                               aria-required="true" />
+                    <span class="hint">Unique. Letters, numbers, dot, dash or underscore.</span>
+                    <ValidationMessage For="() => Input.Username" />
+                </div>
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <InputText id="email" type="email" class="input" @bind-Value="Input.Email" autocomplete="email"
+                               aria-required="true" />
+                    <ValidationMessage For="() => Input.Email" />
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <InputText id="password" type="password" class="input" @bind-Value="Input.Password"
+                               autocomplete="new-password" aria-required="true" />
+                    <span class="hint">At least 6 characters, with an uppercase letter, a lowercase letter, a number and a
+                        symbol.</span>
+                        <ValidationMessage For="() => Input.Password" />
+                    </div>
+
+                    <div class="field">
+                        <label for="confirmPassword">Confirm password</label>
+                        <InputText id="confirmPassword" type="password" class="input" @bind-Value="Input.ConfirmPassword"
+                                   autocomplete="new-password" aria-required="true" />
+                        <ValidationMessage For="() => Input.ConfirmPassword" />
+                    </div>
+
+                    <button type="submit" class="btn btn-block">Create account</button>
+                </EditForm>
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
-</div>
+
+<p class="muted">Just looking? <a class="link-btn" href="">Continue as guest</a></p>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
@@ -63,90 +90,67 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private string? Message => identityErrors is null ? null : string.Join(" ", identityErrors.Select(e => e.Description));
 
     protected override void OnInitialized()
     {
         Input ??= new();
     }
 
-    public async Task RegisterUser(EditContext editContext)
+    public async Task RegisterUser()
     {
-        var user = CreateUser();
+        var user = new ApplicationUser
+        {
+            UserName = Input.Username.Trim(),
+            Email = Input.Email.Trim(),
+            FirstName = Input.FirstName.Trim(),
+            LastName = Input.LastName.Trim()
+        };
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
-
         if (!result.Succeeded)
         {
-            identityErrors = result.Errors;
+            identityErrors = result.Errors; // e.g. "Username 'x' is already taken."
             return;
         }
 
         Logger.LogInformation("User created a new account with password.");
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+        // Every new account is a Contributor. The role is created by SeedData at startup.
+        // This must happen BEFORE sign-in so the role is in the sign-in cookie.
+        await UserManager.AddToRoleAsync(user, "Contributor");
 
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
-        else
-        {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
-    }
-
-    private ApplicationUser CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
-
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<ApplicationUser>)UserStore;
+        // No email confirmation for the MVP (RequireConfirmedAccount is false), so sign in straight away.
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        RedirectManager.RedirectTo(ReturnUrl);
     }
 
     private sealed class InputModel
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Enter your first name.")]
+        [StringLength(50)]
+        public string FirstName { get; set; } = "";
+
+        [Required(ErrorMessage = "Enter your last name.")]
+        [StringLength(50)]
+        public string LastName { get; set; } = "";
+
+        [Required(ErrorMessage = "Choose a username.")]
+        [StringLength(32, MinimumLength = 3, ErrorMessage = "Username must be 3 to 32 characters.")]
+        [RegularExpression(@"^[A-Za-z0-9._-]+$", ErrorMessage = "Use letters, numbers, dot, dash or underscore only.")]
+        public string Username { get; set; } = "";
+
+        [Required(ErrorMessage = "Enter your email.")]
+        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
         public string Email { get; set; } = "";
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [Required(ErrorMessage = "Choose a password.")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "The passwords do not match.")]
         public string ConfirmPassword { get; set; } = "";
     }
 }

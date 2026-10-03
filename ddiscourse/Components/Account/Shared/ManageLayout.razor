@@ -1,17 +1,10 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @layout ddiscourse.Components.Layout.MainLayout
 
-<h1>Manage your account</h1>
+@* Account area: runs inside MainLayout (sidebar, tab bar), with a heading and a
+   horizontal tab strip. These elements become direct children of .page. *@
+<div class="page-head"><h1>Account</h1></div>
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-lg-3">
-            <ManageNavMenu />
-        </div>
-        <div class="col-lg-9">
-            @Body
-        </div>
-    </div>
-</div>
+<ManageNavMenu />
+
+@Body
