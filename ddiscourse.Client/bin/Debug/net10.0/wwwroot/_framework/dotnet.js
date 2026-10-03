@@ -5,7 +5,7 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
   "mainAssemblyName": "ddiscourse.Client",
   "applicationEnvironment": "Development",
   "resources": {
-    "hash": "sha256-5/SsX3A7ReidpSjVcY25IxxVAD8wrOtxzLabz64UoKg=",
+    "hash": "sha256-tffWDGJHqMtO+I3W4RxrbRl6vXb27BVTyr6/EFYZPhA=",
     "jsModuleNative": [
       {
         "name": "dotnet.native.vzj2a6aakt.js"
@@ -1254,16 +1254,16 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
       },
       {
         "virtualPath": "ddiscourse.Client.wasm",
-        "name": "ddiscourse.Client.g0lo7cdcos.wasm",
-        "hash": "sha256-YGdbBkmVRykQApQ2F8+CqWu9rgkGC9zjAI/0xivLGmw=",
+        "name": "ddiscourse.Client.ul43tsy605.wasm",
+        "hash": "sha256-7vhSjE4QWOyZQa9jrldo7vAwL87TnD2u5ih0dpfwaQY=",
         "cache": "force-cache"
       }
     ],
     "pdb": [
       {
         "virtualPath": "ddiscourse.Client.pdb",
-        "name": "ddiscourse.Client.ijrj3ry9rg.pdb",
-        "hash": "sha256-0l7qOzPXjJ+cCCxCITvJR6eSIfKr2ghOKMByoXdn4vM=",
+        "name": "ddiscourse.Client.ngllrfl6zd.pdb",
+        "hash": "sha256-58ZLfTjGyWpm5yueAtVUeCnM3nWeqEyDQj5nZD0jLIM=",
         "cache": "force-cache"
       }
     ],
