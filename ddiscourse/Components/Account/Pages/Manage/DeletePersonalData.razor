@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/DeletePersonalData"
+@page "/Account/Manage/DeletePersonalData"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
@@ -9,31 +9,28 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
 
-<PageTitle>Delete Personal Data</PageTitle>
+<PageTitle>Delete account</PageTitle>
 
-<StatusMessage Message="@message" />
+<div class="card card-pad danger-zone stack">
+    <h2>Delete account</h2>
+    <p>This permanently removes your account, your articles, your comments and your ratings. This cannot be undone.</p>
 
-<h3>Delete Personal Data</h3>
-
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
-</div>
-
-<div>
-    <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+    <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post" class="confirm">
         <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
+        <StatusMessage Message="@message" />
+        <b>Delete your account for good?</b>
         @if (requirePassword)
         {
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
-                <label for="Input.Password" class="form-label">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            <div class="field">
+                <label for="password">Enter your password to confirm</label>
+                <InputText id="password" type="password" class="input" @bind-Value="Input.Password" autocomplete="current-password" aria-required="true" />
+                <ValidationMessage For="() => Input.Password" />
             </div>
         }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
+        <div class="row wrap">
+            <button type="submit" class="btn btn-danger">Yes, delete my account</button>
+            <a class="link-btn" href="Account/Manage">Cancel</a>
+        </div>
     </EditForm>
 </div>
 

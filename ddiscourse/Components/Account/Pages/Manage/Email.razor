@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/Email"
+@page "/Account/Manage/Email"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -14,43 +14,39 @@
 
 <PageTitle>Manage email</PageTitle>
 
-<h3>Manage email</h3>
+<StatusMessage Message="@message" />
 
-<StatusMessage Message="@message"/>
-<div class="row">
-    <div class="col-xl-6">
-        <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
-            <AntiforgeryToken />
-        </form>
-        <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
+<div class="card card-pad">
+    <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
+        <AntiforgeryToken />
+    </form>
+    <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post" class="stack">
+        <h2 class="card-title">Email</h2>
+        <DataAnnotationsValidator />
+
+        <div class="field">
+            <label for="email">Current email</label>
+            <input type="text" value="@email" id="email" class="input" disabled />
             @if (isEmailConfirmed)
             {
-                <div class="form-floating mb-3 input-group">
-                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
-                    <div class="input-group-append">
-                        <span class="h-100 input-group-text text-success font-weight-bold">✓</span>
-                    </div>
-                    <label for="email" class="form-label">Email</label>
-                </div>
+                <span class="hint"><span class="badge">✓ Verified</span></span>
             }
             else
             {
-                <div class="form-floating mb-3">
-                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
-                    <label for="email" class="form-label">Email</label>
-                    <button type="submit" class="btn btn-link" form="send-verification-form">Send verification email</button>
-                </div>
+                <span class="hint">Not verified yet. <button type="submit" class="link-btn" form="send-verification-form">Send verification email</button></span>
             }
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="Enter a new email" />
-                <label for="Input.NewEmail" class="form-label">New email</label>
-                <ValidationMessage For="() => Input.NewEmail" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Change email</button>
-        </EditForm>
-    </div>
+        </div>
+
+        <div class="field">
+            <label for="newEmail">New email</label>
+            <InputText id="newEmail" type="email" class="input" @bind-Value="Input.NewEmail" autocomplete="email" aria-required="true" />
+            <ValidationMessage For="() => Input.NewEmail" />
+        </div>
+
+        <div class="row wrap">
+            <button type="submit" class="btn">Change email</button>
+        </div>
+    </EditForm>
 </div>
 
 @code {

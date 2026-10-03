@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ddiscourse")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6ed35e39a7cf2ecd84200071f27c8672ccf778a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8292d9c8742699be751a7857a139ebfedbc0dc89")]
 [assembly: System.Reflection.AssemblyProductAttribute("ddiscourse")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ddiscourse")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

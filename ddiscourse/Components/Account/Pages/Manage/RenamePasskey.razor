@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/RenamePasskey/{Id}"
+@page "/Account/Manage/RenamePasskey/{Id}"
 
 @using ddiscourse.Data
 @using System.ComponentModel.DataAnnotations
@@ -8,27 +8,30 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<EditForm Model="Input" OnValidSubmit="Rename" FormName="rename-passkey" method="post">
-    <DataAnnotationsValidator />
-    @if (passkey?.Name is { } name)
-    {
-        <h4>Enter a new name for your "@name" passkey</h4>
-    }
-    else
-    {
-        <h4>Enter a name for your passkey</h4>
-    }
-    <hr />
-    <ValidationSummary class="text-danger" role="alert" />
-    <div class="form-floating mb-3">
-        <InputText @bind-Value="Input.Name" id="Input.Name" class="form-control" aria-required="true" placeholder="My passkey" />
-        <label for="Input.Name" class="form-label">Passkey name</label>
-        <ValidationMessage For="() => Input.Name" class="text-danger" />
-    </div>
-    <div>
-        <button type="submit" class="w-100 btn btn-lg btn-primary">Continue</button>
-    </div>
-</EditForm>
+<PageTitle>Rename passkey</PageTitle>
+
+<div class="card card-pad">
+    <EditForm Model="Input" OnValidSubmit="Rename" FormName="rename-passkey" method="post" class="stack">
+        <DataAnnotationsValidator />
+        @if (passkey?.Name is { } name)
+        {
+            <h2 class="card-title">Enter a new name for your "@name" passkey</h2>
+        }
+        else
+        {
+            <h2 class="card-title">Enter a name for your passkey</h2>
+        }
+        <div class="field">
+            <label for="passkeyName">Passkey name</label>
+            <InputText id="passkeyName" class="input" @bind-Value="Input.Name" aria-required="true" />
+            <ValidationMessage For="() => Input.Name" />
+        </div>
+        <div class="row wrap">
+            <button type="submit" class="btn">Continue</button>
+            <a class="btn btn-outline" href="Account/Manage/Passkeys">Cancel</a>
+        </div>
+    </EditForm>
+</div>
 
 @code {
     private ApplicationUser? user;

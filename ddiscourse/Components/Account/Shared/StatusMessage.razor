@@ -1,9 +1,12 @@
-﻿@if (!string.IsNullOrEmpty(DisplayMessage))
+@* Shows a one-off message (from the Message parameter or the redirect cookie).
+   Messages starting with "Error" use the red .alert-error style; everything else is
+   a green .alert-success. The leading "Error:" is dropped because the style already
+   adds a ⚠ icon (see app.css). *@
+@if (!string.IsNullOrEmpty(DisplayMessage))
 {
-    var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-@statusMessageClass" role="alert">
-        @DisplayMessage
-    </div>
+    var isError = DisplayMessage.StartsWith("Error");
+    var text = isError ? DisplayMessage["Error".Length..].TrimStart(':', ' ') : DisplayMessage;
+    <div class="alert @(isError ? "alert-error" : "alert-success")" role="alert">@text</div>
 }
 
 @code {

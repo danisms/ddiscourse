@@ -2,34 +2,22 @@
    Home, Boards, Write (round button), Account / Sign in.
    Guests tapping Write go to sign-in and come back to the editor afterwards. *@
 
-<NavLink class="tab" href="" Match="NavLinkMatch.All">
-    <Icon Name="home" />Home
-</NavLink>
-<NavLink class="tab" href="boards">
-    <Icon Name="boards" />Boards
-</NavLink>
+<NavLink class="tab" href="" Match="NavLinkMatch.All"><Icon Name="home" />Home</NavLink>
+<NavLink class="tab" href="boards"><Icon Name="boards" />Boards</NavLink>
 
 <AuthorizeView>
     <Authorized>
         <NavLink class="tab" href="articles/new">
-            <span class="tab-fab">
-                <Icon Name="write" />
-            </span>
+            <span class="tab-fab"><Icon Name="write" /></span>
             <span class="sr-only">Write article</span>
         </NavLink>
-        <NavLink class="tab" href="account">
-            <Icon Name="user" />Account
-        </NavLink>
+        <NavLink class="tab" href="Account/Manage"><Icon Name="user" />Account</NavLink>
     </Authorized>
     <NotAuthorized>
         <a class="tab" href="Account/Login?ReturnUrl=%2Farticles%2Fnew">
-            <span class="tab-fab">
-                <Icon Name="write" />
-            </span>
+            <span class="tab-fab"><Icon Name="write" /></span>
             <span class="sr-only">Write article (sign in first)</span>
         </a>
-        <NavLink class="tab" href="Account/Login">
-            <Icon Name="user" />Sign in
-        </NavLink>
+        <NavLink class="tab" href="Account/Login"><Icon Name="user" />Sign in</NavLink>
     </NotAuthorized>
 </AuthorizeView>

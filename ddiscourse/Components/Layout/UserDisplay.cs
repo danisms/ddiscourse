@@ -1,19 +1,20 @@
 using System.Security.Claims;
 
-namespace ddiscourse.Components.Layout;   //
+namespace ddiscourse.Components.Layout;
 
-/// <summary>Small helpers so the layout components don't repeat claim logic.</summary>
 public static class UserDisplay
 {
-    public static string Name(ClaimsPrincipal user) => user.Identity?.Name ?? "";
+    /// <summary>Full name from the claim; falls back to the username.</summary>
+    public static string Name(ClaimsPrincipal user) =>
+        user.FindFirst("full_name")?.Value is { Length: > 0 } n ? n : user.Identity?.Name ?? "";
 
-    /// <summary>"daniel.opute@x.com" -> "DO", "daniel@x.com" -> "DA".</summary>
+    /// <summary>"Daniel Opute" -> "DO". One word -> first two letters.</summary>
     public static string Initials(ClaimsPrincipal user)
     {
-        var local = Name(user).Split('@')[0];
-        var parts = local.Split(new[] { ' ', '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpperInvariant();
-        return local.Length >= 2 ? local[..2].ToUpperInvariant() : local.ToUpperInvariant();
+        var parts = Name(user).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        var one = parts.FirstOrDefault() ?? "";
+        return one.Length >= 2 ? one[..2].ToUpperInvariant() : one.ToUpperInvariant();
     }
 
     public static string Role(ClaimsPrincipal user) =>

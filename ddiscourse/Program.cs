@@ -32,9 +32,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
-        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        options.SignIn.RequireConfirmedAccount = false;  // no email sender yet; set true later
+        options.User.RequireUniqueEmail = true;
     })
+    .AddRoles<IdentityRole>()  // without this, roles never work
+    .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -68,5 +70,9 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+// Seed Initial Data.
+// NOTE: Change the admin password before deploying, and read it from configuration instead.
+await SeedData.InitializeAsync(app.Services);  // seed initial data
 
 app.Run();
