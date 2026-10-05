@@ -1,0 +1,215 @@
+@page "/articles/new"
+@page "/articles/{Id:int}/edit"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ddiscourse.Data
+
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+
+@inject IJSRuntime JSRuntime
+
+
+<PageTitle>@(IsEdit ? "Edit Article" : "Write Article")</PageTitle>
+
+<div class="page-head">
+    <h1>@(IsEdit ? "Edit Article" : "Write Article")</h1>
+</div>
+
+@if (loading)
+{
+    <p class="muted">Loading...</p>
+} else if (notFound)
+{
+    <div class="card empty">
+        <h3>Article not found</h3>
+        <p>It may have been deleted, or you don't have permission to edit it.</p>
+        <a class="btn" href="">Back to home</a>
+    </div>
+} else
+{
+    <EditForm Model="Form" OnValidSubmit="SaveAsync" class="card card-pad stack">
+        <DataAnnotationsValidator />
+
+        @if (error is not null)
+        {
+            <div class="alert alert-error" role="alert">@error</div>
+        }
+
+        <div class="field">
+            <label class="sr-only" for="title">Title</label>
+            <InputText id="title" class="input input-title" @bind-Value="Form.Title" @oninput="UpdateTitleCounter" maxlength="@TitleMaxLength" placeholder="Article Title" />
+            <span class="hint">@titleCounter</span>
+            <ValidationMessage For="() => Form.Title" />
+        </div>
+
+        <div class="field">
+            <label for="board">Board</label>
+            <InputSelect id="board" class="input" @bind-Value="Form.BoardId">
+                <option value="0">Select a board</option>
+                @foreach (var board in boards)
+                {
+                    <option value="@board.Id">@board.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => Form.BoardId" />
+        </div>
+
+        <div class="field">
+            <label for="body">Article</label>
+            <InputTextArea id="body" class="input" @bind-Value="Form.Body" placeholder="Start writing..." />
+            <span class="hint">Plain text only. Publish is the only save; there are no drafts.</span>
+            <ValidationMessage For="() => Form.Body" />
+        </div>
+
+        <div class="row">
+            <button class="btn btn-outline" @onclick="ConfirmCancel" @onclick:preventDefault="true">Cancel</button>
+            <button type="submit" class="btn btn-green spacer" disabled="@saving">
+                @(saving ? "Publishing..." : IsEdit ? "Save changes" : "Publish")
+            </button>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private bool IsEdit => Id is not null;
+    private bool loading = true;
+    private bool notFound;
+    private string? userId;
+
+    private List<Board> boards = new();
+
+    private ArticleForm Form { get; set; } = new();
+    private string? error;
+    private bool saving;
+
+    private const int TitleMaxLength = 120;
+    private string titleCounter => $"{Form.Title.Length} / {TitleMaxLength}";
+
+    private void UpdateTitleCounter(ChangeEventArgs e)
+    {
+        Form.Title = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task ConfirmCancel()
+    {
+        bool confirmed = false;
+
+        if (Form.Title.Trim() == string.Empty && Form.BoardId == 0 && Form.Body.Trim() == string.Empty)
+        {
+            confirmed = true;
+        } else
+        {
+            confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Discard changes?");
+        }
+
+
+        if (confirmed)
+        {
+            Nav.NavigateTo("", true);
+        }
+    }
+
+    private async Task SaveAsync()
+    {        
+        saving = true;
+        error = null;
+        Article article;
+
+        try
+        {
+            if (IsEdit)
+            {
+                article = (await Db.Articles.FirstOrDefaultAsync(a => a.Id == Id && a.AuthorId == userId))!;
+                if (article is null)
+                {
+                    error = "This article could not be found or you don't have permission to edit it.";
+                    return;
+                }
+
+                article.Title = Form.Title.Trim();
+                article.BoardId = Form.BoardId;
+                article.Body = Form.Body.Trim();
+                article.EditedAt = DateTime.UtcNow;
+            } else
+            {
+                article = new Article
+                {
+                    AuthorId = userId!,
+                    BoardId = Form.BoardId,
+                    Title = Form.Title.Trim(),
+                    Body = Form.Body.Trim()
+                };
+
+                Db.Articles.Add(article);  // Article Id is set once article is successfully added to db
+            }
+
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo($"/articles/{article.Id}");
+        } catch (Exception)
+        {
+            error = "Something went wrong while saving your article. Please try again.";
+        } finally
+        {
+            saving = false;
+        }
+    }
+
+    // NOTE: I can use the Article Model directly, but I want to keep the form separate from the model for now. This allows me to have different validation rules and not have to worry about accidentally saving a property that shouldn't be saved.
+    private sealed class ArticleForm
+    {
+        [Required(ErrorMessage = "Please give your article a title.")]
+        [StringLength(TitleMaxLength, ErrorMessage = "Title must be 120 characters or fewer.")]
+        public string Title { get; set; } = "";
+
+        [Range(1, int.MaxValue, ErrorMessage = "Select a board.")]
+        public int BoardId { get; set; }
+
+        [Required(ErrorMessage = "Write something before publishing")]
+        public string Body { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId is null)
+        {
+            Nav.NavigateTo($"Account/Login?ReturnUrl={Uri.EscapeDataString(Nav.Uri)}", forceLoad: true);
+            return;
+        }
+
+        boards = await Db.Boards.OrderBy(b => b.Name).ToListAsync();
+
+        if (IsEdit)
+        {
+            var article = await Db.Articles.AsNoTracking().FirstOrDefaultAsync(article => article.Id == Id && article.AuthorId == userId);
+
+            if (article is null)
+            {
+                notFound = true;
+                loading = false;
+                return;
+            }
+
+            Form = new ArticleForm
+            {
+                Title = article.Title,
+                BoardId = article.BoardId,
+                Body = article.Body
+            };
+        }
+        loading = false;
+    }
+}
