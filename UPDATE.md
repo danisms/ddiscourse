@@ -58,3 +58,18 @@ dotnet ef database update
 - All Account pages i.e. (Login, Register...) has been styled.
 
 ---
+
+---
+
+### Developer Name: Daniel C. Opute
+
+### Branch: do-build-article-page
+
+### Date: 05-10-2026
+
+### REPORT
+
+Article create and edit page is created and tested.
+Page works fine, as data is added and updated on db
+
+---
