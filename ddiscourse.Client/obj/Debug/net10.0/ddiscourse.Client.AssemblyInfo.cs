@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ddiscourse.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f9b4cddaecc196edf9305c8f7d2c7a4362e1a71")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34fff82d79317807c60f00fbdfcf39e5a92f09f4")]
 [assembly: System.Reflection.AssemblyProductAttribute("ddiscourse.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ddiscourse.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

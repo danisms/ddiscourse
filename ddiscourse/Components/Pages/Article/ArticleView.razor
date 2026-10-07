@@ -1,0 +1,425 @@
+@page "/articles/{Id:int}"
+
+@rendermode InteractiveServer
+
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ddiscourse.Data
+
+@using Ganss.Xss
+@inject IHtmlSanitizer Sanitizer
+
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+
+@inject IJSRuntime JSRuntime
+
+
+<PageTitle>@(article is null ? "Article Not Found" : $"Read {article.Title}")</PageTitle>
+
+@if (loading)
+{
+    <p class="muted">Loading...</p>
+}
+else if (article is null)
+{
+    <div class="card empty">
+        <h3>Article not found</h3>
+        <p>It may have been deleted, or you've got the wrong link</p>
+        <a class="btn" href="">Back to home</a>
+    </div>
+}
+else
+{
+    @* ================= THE ARTICLE ================= *@
+    <article class="article c@(article.BoardId % 6)">
+        <p class="crumbs"><a href="boards/@article.BoardId">← @article.Board?.Name</a></p>
+        <span class="tag">@article.Board?.Name</span>
+        <h1>@article.Title</h1>
+
+        <div class="article-meta">
+            <span class="avatar avatar-lg" aria-hidden="true">@Initials(article.Author?.FullName)</span>
+            <div>
+                @article.Author?.FullName
+                <small>
+                    @article.CreatedAt.ToString("MMM d, yyyy")
+                    @if (article.EditedAt is not null)
+                    {
+                        <span> · edited</span>
+                    }
+                </small>
+            </div>
+
+            @if (isAuthor || isStaff)
+            {
+                <span class="spacer row">
+                    @if (isAuthor)
+                    {
+                        <a class="btn btn-outline btn-sm" href="articles/@article.Id/edit">Edit</a>
+                    }
+                    <button type="button" class="btn btn-outline btn-sm" @onclick="() => confirmingDelete = true">Delete</button>
+                </span>
+            }
+        </div>
+
+        @if (confirmingDelete)
+        {
+            <div class="confirm">
+                <b>Delete this article and all its comments?</b>
+                <div class="row wrap">
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteArticleAsync">Yes, delete it</button>
+                    <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                </div>
+            </div>
+        }
+
+        @* The body is HTML written by a user, so it is sanitized first. Never render article.Body directly. *@
+        <div class="prose prose-html">@((MarkupString)safeBody)</div>
+
+        @* ================= RATING ================= *@
+        <div class="card rate-row">
+            <span class="stars" aria-hidden="true">
+                @for (var n = 1; n <= 5; n++)
+                {
+                    @StarSvg(n <= Math.Round(average))
+                }
+            </span>
+            <b>@(ratingCount > 0 ? average.ToString("0.0") : "No ratings yet")</b>
+            @if (ratingCount > 0)
+            {
+                <span class="muted">@ratingCount @(ratingCount == 1 ? "rating" : "ratings")</span>
+            }
+
+            @if (userId is null)
+            {
+                <a class="spacer link-btn" href="@LoginUrl">Sign in to rate</a>
+            }
+            else if (isAuthor)
+            {
+                <span class="spacer muted">You can't rate your own article</span>
+            }
+            else
+            {
+                <span class="spacer muted">@(myRating > 0 ? "Your rating:" : "Rate it:")</span>
+                <span class="stars">
+                    @for (var n = 1; n <= 5; n++)
+                    {
+                        var star = n;
+                        <button type="button" class="star-btn" aria-label="Rate @star out of 5" disabled="@busy" @onclick="() => RateAsync(star)">
+                            @StarSvg(star <= myRating)
+                        </button>
+                    }
+                </span>
+            }
+        </div>
+    </article>
+
+    @* ================= DISCUSSION ================= *@
+    <div class="page-head">
+        <h2 style="font-size:18px;font-weight:600">Discussion (@article.Comments.Count)</h2>
+    </div>
+
+    @if (userId is null)
+    {
+        <div class="card card-pad row wrap">
+            <span class="muted">Want to join the conversation?</span>
+            <a class="btn btn-sm" href="@LoginUrl">Sign in to comment</a>
+        </div>
+    }
+    else
+    {
+        <div class="card card-pad stack">
+            <label class="sr-only" for="newComment">Comment</label>
+            <textarea id="newComment" class="input input-sm" placeholder="Add to the discussion"
+                      @bind="newComment" @bind:event="oninput"></textarea>
+            @if (commentError is not null)
+            {
+                <p class="validation-message">@commentError</p>
+            }
+            <div>
+                <button type="button" class="btn btn-sm" disabled="@busy" @onclick="PostCommentAsync">Post comment</button>
+            </div>
+        </div>
+    }
+
+    @if (article.Comments.Count == 0)
+    {
+        <div class="card empty">
+            <h3>No comments yet</h3>
+            <p>Be the first to join the discussion.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var c in article.Comments)
+        {
+            var isMine = c.AuthorId == userId;
+
+            <div class="card comment">
+                <div class="comment-head">
+                    <span class="avatar" aria-hidden="true">@Initials(c.Author?.FullName)</span>
+                    <b>@c.Author?.FullName</b>
+                    <span class="muted">
+                        @c.CreatedAt.ToString("MMM d, yyyy")
+                        @if (c.EditedAt is not null)
+                        {
+                            <span> · edited</span>
+                        }
+                    </span>
+                </div>
+
+                @if (editingId == c.Id)
+                {
+                    <label class="sr-only" for="editComment">Edit comment</label>
+                    <textarea id="editComment" class="input input-sm" @bind="editText" @bind:event="oninput"></textarea>
+                    @if (commentError is not null)
+                    {
+                        <p class="validation-message">@commentError</p>
+                    }
+                    <div class="comment-actions">
+                        <button type="button" class="link-btn" disabled="@busy" @onclick="SaveEditAsync">Save</button>
+                        <button type="button" class="link-btn" @onclick="CancelEdit">Cancel</button>
+                    </div>
+                }
+                else
+                {
+                    <p class="comment-body">@c.Body</p>
+
+                    @if (isMine || isStaff)
+                    {
+                        <div class="comment-actions">
+                            @if (isMine)
+                            {
+                                <button type="button" class="link-btn" @onclick="() => StartEdit(c)">Edit</button>
+                            }
+                            @if (confirmingCommentId == c.Id)
+                            {
+                                <span class="muted">Delete this comment?</span>
+                                <button type="button" class="link-btn danger" disabled="@busy" @onclick="() => DeleteCommentAsync(c.Id)">Yes, delete</button>
+                                <button type="button" class="link-btn" @onclick="() => confirmingCommentId = null">No</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="link-btn danger" @onclick="() => confirmingCommentId = c.Id">Delete</button>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Article? article;
+
+    private bool loading = true;
+    private bool busy; // true if a save is running (for disabling buttons)
+
+    // --- get the viewer
+    private string? userId;
+    private bool isStaff; // an admin or moderator
+    private bool isAuthor => article is not null && article.AuthorId == userId;
+
+    // --- rating
+    private int myRating;
+    private int ratingCount => article?.Ratings.Count ?? 0;
+    private double average => ratingCount > 0 ? article!.Ratings.Average(r => r.Value) : 0;
+
+    // --- comment
+    private string newComment = "";
+    private string? commentError;
+    private int? editingId;
+    private string editText = "";
+    private int? confirmingCommentId;
+    private bool confirmingDelete;
+
+    private string LoginUrl => $"Account/Login?ReturnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(Nav.Uri))}";
+
+    private string safeBody = string.Empty;
+
+
+    // Runs when the componet start and whenever Id changes i.e. (e.g. /article/1 change to /article/2)
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        ResetUi();
+
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        isStaff = auth.User.IsInRole("Admin") || auth.User.IsInRole("Moderator");
+
+        await LoadAsync();
+        loading = false;
+    }
+
+    private async Task LoadAsync()
+    {
+        article = await Db.Articles.AsNoTracking()
+        .Include(a => a.Board)
+        .Include(a => a.Author)
+        .Include(a => a.Comments.OrderBy(c => c.CreatedAt))
+        .ThenInclude(c => c.Author)
+        .Include(a => a.Ratings)
+        .AsSplitQuery()
+        .FirstOrDefaultAsync(article => article.Id == Id);
+
+        safeBody = article is null ? "" : ArticleContent.ToSafeHtml(article.Body, Sanitizer);
+        myRating = article?.Ratings.FirstOrDefault(r => r.UserId == userId)?.Value ?? 0;
+    }
+
+    private void ResetUi()
+    {
+        commentError = null;
+        editingId = null;
+        confirmingCommentId = null;
+        confirmingDelete = false;
+    }
+
+    // ================= ARTICLE =================
+    private async Task DeleteArticleAsync()
+    {
+        busy = true;
+        try
+        {
+            // Only the author or a moderator/admin can delete. Comments and ratings are deleted with it.
+            var entity = await Db.Articles.FirstOrDefaultAsync(a => a.Id == Id && (a.AuthorId == userId || isStaff));
+            if (entity is null) return;
+
+            Db.Articles.Remove(entity);
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo("");
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // ================= RATING =================
+    private async Task RateAsync(int value)
+    {
+        if (userId is null || isAuthor || value < 1 || value > 5) return;
+
+        busy = true;
+        try
+        {
+            var rating = await Db.Ratings.FirstOrDefaultAsync(r => r.ArticleId == Id && r.UserId == userId);
+            if (rating is null)
+                Db.Ratings.Add(new Rating { ArticleId = Id, UserId = userId, Value = value });
+            else
+                rating.Value = value;
+
+            await Db.SaveChangesAsync();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // ================= COMMENTS =================
+    private async Task PostCommentAsync()
+    {
+        commentError = Validate(newComment);
+        if (commentError is not null || userId is null) return;
+
+        busy = true;
+        try
+        {
+            Db.Comments.Add(new Comment { ArticleId = Id, AuthorId = userId, Body = newComment.Trim() });
+            await Db.SaveChangesAsync();
+            newComment = "";
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void StartEdit(Comment c)
+    {
+        editingId = c.Id;
+        editText = c.Body;
+        commentError = null;
+        confirmingCommentId = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingId = null;
+        commentError = null;
+    }
+
+    private async Task SaveEditAsync()
+    {
+        commentError = Validate(editText);
+        if (commentError is not null || editingId is null) return;
+
+        busy = true;
+        try
+        {
+            // Only your own comment can be edited
+            var entity = await Db.Comments.FirstOrDefaultAsync(c => c.Id == editingId && c.AuthorId == userId);
+            if (entity is null) return;
+
+            entity.Body = editText.Trim();
+            entity.EditedAt = DateTime.UtcNow;
+            await Db.SaveChangesAsync();
+
+            editingId = null;
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteCommentAsync(int commentId)
+    {
+        busy = true;
+        try
+        {
+            // Your own comment, or any comment if you are a moderator/admin
+            var entity = await Db.Comments.FirstOrDefaultAsync(c => c.Id == commentId && (c.AuthorId == userId || isStaff));
+            if (entity is null) return;
+
+            Db.Comments.Remove(entity);
+            await Db.SaveChangesAsync();
+
+            confirmingCommentId = null;
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // ================= HELPERS =================
+    private static string? Validate(string text)
+    {
+        var t = text.Trim();
+        if (t.Length == 0) return "Write a comment first.";
+        if (t.Length > 2000) return "Comments can be up to 2000 characters.";
+        return null;
+    }
+
+    private static string Initials(string? name)
+    {
+        var parts = (name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        return parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "?";
+    }
+
+    private static MarkupString StarSvg(bool filled) => new(
+        $"<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"{(filled ? "currentColor" : "none")}\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\">" +
+        "<path d=\"M12 3l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 21l1.2-6.5L2.5 9.9 9.1 9z\"/></svg>");
+}
