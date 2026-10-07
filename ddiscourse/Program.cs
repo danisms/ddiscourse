@@ -43,6 +43,13 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+builder.Services.AddScoped<Ganss.Xss.IHtmlSanitizer>(_ =>
+{
+    var s = new Ganss.Xss.HtmlSanitizer();
+    s.AllowedTags.Remove("img");   // optional: no remote images
+    return s;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

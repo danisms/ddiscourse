@@ -64,7 +64,7 @@
         <div class="field">
             <label for="body">Article</label>
             <InputTextArea id="body" class="input" @bind-Value="Form.Body" placeholder="Start writing..." />
-            <span class="hint">Plain text only. Publish is the only save; there are no drafts.</span>
+            <span class="hint">@articleHint. Publish is the only save; there are no drafts.</span>
             <ValidationMessage For="() => Form.Body" />
         </div>
 
@@ -95,6 +95,8 @@
 
     private const int TitleMaxLength = 120;
     private string titleCounter => $"{Form.Title.Length} / {TitleMaxLength}";
+
+    private string articleHint = "Write in Markdown or simple HTML. For example: ## Heading, **bold**, *italic*, - list item, [link text](https://example.com)";
 
     private void UpdateTitleCounter(ChangeEventArgs e)
     {
