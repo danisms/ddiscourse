@@ -207,6 +207,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBcnRpY2xlXEFydGljbGVWaWV3LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Pages/Board/BoardView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xCb2FyZFxCb2FyZFZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -221,6 +225,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Routes.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Shared/ArticleCard.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQXJ0aWNsZUNhcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Shared/ArticleSearch.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQXJ0aWNsZVNlYXJjaC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Danism/Documents/BYU-Idaho/CSE-325 - .NET - Software Development/ddiscourse/ddiscourse/Components/Shared/Icon.razor]

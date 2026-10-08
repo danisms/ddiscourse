@@ -1,0 +1,28 @@
+@* A reusable search box. It owns NO list and changes NO data.
+   It only reports what the user typed. The page decides what to do with it.
+
+   Usage: with two-way binding:
+       <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="Search Technology" />
+
+   "Value" + "ValueChanged" is the naming pattern that makes @bind-Value work on a component. *@
+
+<div class="search">
+    <label class="sr-only" for="@Id">Search</label>
+    <Icon Name="search" />
+    <input id="@Id" class="input" type="text" autocomplete="off" placeholder="@Placeholder" value="@Value"
+           @oninput="OnInput" />
+</div>
+
+@code {
+    private readonly string Id = $"search-{Guid.NewGuid():N}"; // unique, so two search boxes never share an id
+
+    [Parameter]
+    public string Value { get; set; } = ""; // flows DOWN from the page
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; } // flows UP to the page
+    [Parameter]
+    public string Placeholder { get; set; } = "Search articles";
+
+    // Runs on every keystroke and tells the page the new text
+    private Task OnInput(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? "");
+}

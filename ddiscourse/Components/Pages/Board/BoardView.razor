@@ -1,0 +1,172 @@
+@page "/boards/{Id:int}"
+@rendermode InteractiveServer
+
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ddiscourse.Data
+
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthProvider
+
+<PageTitle>@(board is null ? "Board not found" : $"Discourse on {board.Name}")</PageTitle>
+
+@if (loading)
+{
+    <p class="muted">Loading…</p>
+}
+else if (board is null)
+{
+    <div class="card empty">
+        <h3>Board not found</h3>
+        <p>It may have been removed, or the link is wrong.</p>
+        <a class="btn" href="boards">Back to Boards</a>
+    </div>
+}
+else
+{
+    <p class="crumbs"><a href="boards">← Back to Boards</a></p>
+
+    <div class="card board-head c@(Id % 6)">
+        <div class="band"></div>
+        <div class="body">
+            <h1>@board.Name</h1>
+            <p class="muted">@CountText</p>
+        </div>
+    </div>
+
+    @if (allArticles.Count == 0)
+    {
+        @* The board itself is empty *@
+        <div class="card empty">
+            <h3>Empty board</h3>
+            @if (userId is not null)
+            {
+                <p>Be the first to publish an article on @board.Name.</p>
+                <a class="btn" href="articles/new">Write article</a>
+            }
+            else
+            {
+                <p>There are no articles on @board.Name yet.</p>
+                <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew">Sign in to write an article</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="filters filters-2">
+            <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="@($"Search {board.Name}")" />
+
+            <select class="input" aria-label="Sort articles" @bind="sort" @bind:after="ApplyFilter">
+                <option value="newest">Newest</option>
+                <option value="top">Top rated</option>
+                <option value="discussed">Most discussed</option>
+            </select>
+        </div>
+
+        @if (visible.Count == 0)
+        {
+            @* Articles exist, but none match the search. The search box stays on screen. *@
+            <div class="card empty">
+                <h3>No matches</h3>
+                <p>Nothing on @board.Name matches “@searchText.Trim()”.</p>
+                <button type="button" class="btn btn-outline" @onclick="ClearSearch">Clear search</button>
+            </div>
+        }
+        else
+        {
+            @foreach (var article in visible)
+            {
+                <ArticleCard article="article" />
+            }
+        }
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Board? board;
+    private List<Article> allArticles = new(); // everything on this board, loaded once. Never edited by the search.
+    private List<Article> visible = new(); // what is shown after search + sort
+    private string searchText = "";
+    private string sort = "newest";
+    private string? userId;
+    private bool loading = true;
+
+    private string CountText
+    {
+        get
+        {
+            var total = allArticles.Count;
+            if (total == 0) return "No articles";
+            if (!string.IsNullOrWhiteSpace(searchText)) return $"{visible.Count} of {total} articles";
+            return total == 1 ? "1 article" : $"{total} articles";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        searchText = "";
+        sort = "newest";
+
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        Board boardModel = new();
+        board = await boardModel.GetBoard(Db, Id);
+
+        if (board is null)
+        {
+            allArticles = new();
+        }
+        else
+        {
+            // Load once. Include whatever ArticleCard shows (author, comment count, rating).
+            allArticles = await Db.Articles
+                .AsNoTracking()
+                .Where(a => a.BoardId == Id)
+                .Include(a => a.Board)
+                .Include(a => a.Author)
+                .Include(a => a.Comments)
+                .Include(a => a.Ratings)
+                .AsSplitQuery()
+                .OrderByDescending(a => a.CreatedAt)
+                .ToListAsync();
+        }
+
+        ApplyFilter();
+        loading = false;
+    }
+
+    // Builds `visible` from `allArticles`. allArticles itself is never changed, so clearing the search brings everything back.
+    private void ApplyFilter()
+    {
+        IEnumerable<Article> query = allArticles;
+
+        var term = searchText.Trim();
+        if (term.Length > 0)
+        {
+            query = query.Where(a =>
+                a.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (a.Author?.FullName ?? "").Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        query = sort switch
+        {
+            "top" => query.OrderByDescending(a => a.Ratings.Count > 0 ? a.Ratings.Average(r => r.Value) : 0)
+                          .ThenByDescending(a => a.CreatedAt),
+            "discussed" => query.OrderByDescending(a => a.Comments.Count)
+                                .ThenByDescending(a => a.CreatedAt),
+            _ => query.OrderByDescending(a => a.CreatedAt)
+        };
+
+        visible = query.ToList();
+    }
+
+    private void ClearSearch()
+    {
+        searchText = "";
+        ApplyFilter();
+    }
+}

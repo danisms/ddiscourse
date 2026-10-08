@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using AngleSharp.Dom;
+using Microsoft.EntityFrameworkCore;
 
 namespace ddiscourse.Data;
 
@@ -24,4 +26,33 @@ public class Article
 
     public List<Comment> Comments { get; set; } = [];
     public List<Rating> Ratings { get; set; } = [];
+
+    public async Task<Article?> GetArticle(ApplicationDbContext Db, int Id)
+    {
+        Article? article = await Db.Articles.AsNoTracking()
+        .Include(a => a.Board)
+        .Include(a => a.Author)
+        .Include(a => a.Comments.OrderBy(c => c.CreatedAt))
+        .ThenInclude(c => c.Author)
+        .Include(a => a.Ratings)
+        .AsSplitQuery()
+        .FirstOrDefaultAsync(article => article.Id == Id);
+
+        return article;
+    }
+
+    public async Task<List<Article>?> GetAllArticles(ApplicationDbContext Db, int BoardId)
+    {
+        List<Article>? articles = await Db.Articles.AsNoTracking()
+        .Include(a => a.Board)
+        .Include(a => a.Author)
+        .Include(a => a.Comments)
+        .Include(a => a.Ratings)
+        .AsSplitQuery()
+        .ToListAsync();
+
+        articles?.RemoveAll(a => a.BoardId != BoardId);
+
+        return articles;
+    }
 }
