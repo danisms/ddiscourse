@@ -1,0 +1,37 @@
+@using ddiscourse.Data
+@using ddiscourse.Components.Utils
+
+@if (article is not null)
+{
+    <a class="card article-card c@(article.BoardId % 6)" href="/articles/@article.Id">
+        <span class="tag">@article.Board?.Name</span>
+        <h3>@article.Title</h3>
+        <p class="excerpt">@ArticleContent.PlainExcerpt(article.Body)</p>
+        <div class="meta">
+            <span class="avatar c@(article.BoardId % 6)">
+                @Utils.Initials(article.Author?.FullName)
+            </span>
+            <b>@article.Author?.FullName</b>
+            <span>@article.CreatedAt.ToString("MMM d, yyyy")</span>
+            <span class="count">
+                @* Rating Count *@
+                @(ratingCount > 0 ? "★ " + average.ToString("0.0") : "No rating")
+
+                @* Comment Count *@
+                · @(article.Comments.Count > 0 ? ((article.Comments.Count == 1) ? "1 Comment" : $"{article.Comments.Count} Comments") : "No Comment")
+            </span>
+        </div>
+    </a>
+}
+else
+{
+    // do nothing
+}
+
+@code {
+    [Parameter]
+    public Article? article { get; set; }
+
+    private int ratingCount => article?.Ratings.Count ?? 0;
+    private double average => ratingCount > 0 ? article!.Ratings.Average(r => r.Value) : 0;
+}

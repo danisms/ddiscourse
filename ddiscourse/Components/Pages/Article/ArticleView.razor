@@ -5,6 +5,7 @@
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @using ddiscourse.Data
+@using ddiscourse.Components.Utils
 
 @using Ganss.Xss
 @inject IHtmlSanitizer Sanitizer
@@ -39,7 +40,7 @@ else
         <h1>@article.Title</h1>
 
         <div class="article-meta">
-            <span class="avatar avatar-lg" aria-hidden="true">@Initials(article.Author?.FullName)</span>
+            <span class="avatar avatar-lg" aria-hidden="true">@Utils.Initials(article.Author?.FullName)</span>
             <div>
                 @article.Author?.FullName
                 <small>
@@ -82,7 +83,7 @@ else
             <span class="stars" aria-hidden="true">
                 @for (var n = 1; n <= 5; n++)
                 {
-                    @StarSvg(n <= Math.Round(average))
+                    @Utils.StarSvg(n <= Math.Round(average))
                 }
             </span>
             <b>@(ratingCount > 0 ? average.ToString("0.0") : "No ratings yet")</b>
@@ -107,7 +108,7 @@ else
                     {
                         var star = n;
                         <button type="button" class="star-btn" aria-label="Rate @star out of 5" disabled="@busy" @onclick="() => RateAsync(star)">
-                            @StarSvg(star <= myRating)
+                            @Utils.StarSvg(star <= myRating)
                         </button>
                     }
                 </span>
@@ -158,7 +159,7 @@ else
 
             <div class="card comment">
                 <div class="comment-head">
-                    <span class="avatar" aria-hidden="true">@Initials(c.Author?.FullName)</span>
+                    <span class="avatar" aria-hidden="true">@Utils.Initials(c.Author?.FullName)</span>
                     <b>@c.Author?.FullName</b>
                     <span class="muted">
                         @c.CreatedAt.ToString("MMM d, yyyy")
@@ -215,7 +216,8 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    private Article? article;
+    private Article? article;  // store the article query
+    private Article Article = new();  // article class to query from
 
     private bool loading = true;
     private bool busy; // true if a save is running (for disabling buttons)
@@ -259,15 +261,8 @@ else
 
     private async Task LoadAsync()
     {
-        article = await Db.Articles.AsNoTracking()
-        .Include(a => a.Board)
-        .Include(a => a.Author)
-        .Include(a => a.Comments.OrderBy(c => c.CreatedAt))
-        .ThenInclude(c => c.Author)
-        .Include(a => a.Ratings)
-        .AsSplitQuery()
-        .FirstOrDefaultAsync(article => article.Id == Id);
 
+        article = await Article.GetArticle(Db, Id);
         safeBody = article is null ? "" : ArticleContent.ToSafeHtml(article.Body, Sanitizer);
         myRating = article?.Ratings.FirstOrDefault(r => r.UserId == userId)?.Value ?? 0;
     }
@@ -412,14 +407,4 @@ else
         return null;
     }
 
-    private static string Initials(string? name)
-    {
-        var parts = (name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 2) return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-        return parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "?";
-    }
-
-    private static MarkupString StarSvg(bool filled) => new(
-        $"<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"{(filled ? "currentColor" : "none")}\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\">" +
-        "<path d=\"M12 3l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 21l1.2-6.5L2.5 9.9 9.1 9z\"/></svg>");
 }
