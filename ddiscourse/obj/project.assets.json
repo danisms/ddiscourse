@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 3,
   "targets": {
     "net10.0": {
       "AngleSharp/1.7.2": {
@@ -74,7 +74,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.App.Internal.Assets/10.0.11": {
+      "Microsoft.AspNetCore.App.Internal.Assets/10.0.12": {
         "type": "package",
         "build": {
           "build/Microsoft.AspNetCore.App.Internal.Assets.props": {},
@@ -522,6 +522,21 @@
           "lib/net8.0/Microsoft.Data.Sqlite.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "Microsoft.DotNet.HotReload.WebAssembly.Browser/10.0.112": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Microsoft.DotNet.HotReload.WebAssembly.Browser.dll": {}
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.DotNet.HotReload.WebAssembly.Browser.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.DotNet.HotReload.WebAssembly.Browser.props": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/Microsoft.DotNet.HotReload.WebAssembly.Browser.props": {}
         }
       },
       "Microsoft.EntityFrameworkCore/10.0.11": {
@@ -986,7 +1001,8 @@
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
           "Microsoft.AspNetCore.Components.WebAssembly": "10.0.11",
-          "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "10.0.11"
+          "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "10.0.11",
+          "Microsoft.DotNet.HotReload.WebAssembly.Browser": "10.0.112"
         },
         "compile": {
           "bin/placeholder/ddiscourse.Client.dll": {}
@@ -1105,10 +1121,10 @@
         "readme.md"
       ]
     },
-    "Microsoft.AspNetCore.App.Internal.Assets/10.0.11": {
-      "sha512": "tYYYBZsuF2DSz1I3hcfB8qC4nNekIKufkYZOJ2R28fNK3PkS7fJao/mIX5H84NH94UACZQ4dhvt8GDlkrJFwLg==",
+    "Microsoft.AspNetCore.App.Internal.Assets/10.0.12": {
+      "sha512": "+sIBo9AMBZH46qHWHQdfzcGMt+RuBaPYrUMOAM9VjA7MQ9QtIez3lq1C3E05+Yroa94KKt3DSWaxmCI4H28a9Q==",
       "type": "package",
-      "path": "microsoft.aspnetcore.app.internal.assets/10.0.11",
+      "path": "microsoft.aspnetcore.app.internal.assets/10.0.12",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1124,7 +1140,7 @@
         "build/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildMultiTargeting/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildTransitive/Microsoft.AspNetCore.App.Internal.Assets.targets",
-        "microsoft.aspnetcore.app.internal.assets.10.0.11.nupkg.sha512",
+        "microsoft.aspnetcore.app.internal.assets.10.0.12.nupkg.sha512",
         "microsoft.aspnetcore.app.internal.assets.nuspec"
       ]
     },
@@ -2327,6 +2343,25 @@
         "microsoft.data.sqlite.core.nuspec"
       ]
     },
+    "Microsoft.DotNet.HotReload.WebAssembly.Browser/10.0.112": {
+      "sha512": "1k5ylG+88HAS1Gy72U6BXo+TVGkdGSMsKeaf3shHs46JuxwSbT8adKMcv22XWEi6ERr/blPZJc8tb49LtasLGQ==",
+      "type": "package",
+      "path": "microsoft.dotnet.hotreload.webassembly.browser/10.0.112",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "build/Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+        "build/Microsoft.AspNetCore.StaticWebAssets.props",
+        "build/Microsoft.DotNet.HotReload.WebAssembly.Browser.props",
+        "buildMultiTargeting/Microsoft.DotNet.HotReload.WebAssembly.Browser.props",
+        "buildTransitive/Microsoft.DotNet.HotReload.WebAssembly.Browser.props",
+        "lib/net10.0/Microsoft.DotNet.HotReload.WebAssembly.Browser.dll",
+        "microsoft.dotnet.hotreload.webassembly.browser.10.0.112.nupkg.sha512",
+        "microsoft.dotnet.hotreload.webassembly.browser.nuspec",
+        "staticwebassets/Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js"
+      ]
+    },
     "Microsoft.EntityFrameworkCore/10.0.11": {
       "sha512": "VOSGU8en6HZJs8t7UMFN+9vGcRgVOOn6fA44Ngcg2NyvJ3P1KE94iAb0XzaVaGhXGtt+qaM/VtEn0/hzluQJeg==",
       "type": "package",
@@ -2852,7 +2887,7 @@
     "net10.0": [
       "HtmlSanitizer >= 9.2.1039",
       "Markdig >= 1.4.0",
-      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.11",
+      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.12",
       "Microsoft.AspNetCore.Components.WebAssembly.Server >= 10.0.11",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 10.0.11",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.11",
@@ -2863,19 +2898,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Danism\\.nuget\\packages\\": {}
+    "/home/jacob/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse\\ddiscourse.csproj",
+      "projectUniqueName": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse/ddiscourse.csproj",
       "projectName": "ddiscourse",
-      "projectPath": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse\\ddiscourse.csproj",
-      "packagesPath": "C:\\Users\\Danism\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse\\obj\\",
+      "projectPath": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse/ddiscourse.csproj",
+      "packagesPath": "/home/jacob/.nuget/packages/",
+      "outputPath": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Danism\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/jacob/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2885,11 +2920,10 @@
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj": {
-              "projectPath": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj"
+            "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj": {
+              "projectPath": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj"
             }
           }
         }
@@ -2904,11 +2938,10 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.400"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net10.0": {
-        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "HtmlSanitizer": {
@@ -2922,7 +2955,7 @@
           "Microsoft.AspNetCore.App.Internal.Assets": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.11, )",
+            "version": "[10.0.12, )",
             "autoReferenced": true
           },
           "Microsoft.AspNetCore.Components.WebAssembly.Server": {
@@ -2970,7 +3003,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.112/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj": {}
+    "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj": {
+    "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj",
+        "projectUniqueName": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj",
         "projectName": "ddiscourse.Client",
-        "projectPath": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\ddiscourse.Client.csproj",
-        "packagesPath": "C:\\Users\\Danism\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Danism\\Documents\\BYU-Idaho\\CSE-325 - .NET - Software Development\\ddiscourse\\ddiscourse.Client\\obj\\",
+        "projectPath": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/ddiscourse.Client.csproj",
+        "packagesPath": "/home/jacob/.nuget/packages/",
+        "outputPath": "/home/jacob/Documents/School/cse325-group-project/ddiscourse/ddiscourse.Client/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Danism\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/jacob/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -24,7 +24,6 @@
         },
         "frameworks": {
           "net10.0": {
-            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -39,17 +38,16 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.AspNetCore.App.Internal.Assets": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.11, )",
+              "version": "[10.0.12, )",
               "autoReferenced": true
             },
             "Microsoft.AspNetCore.Components.WebAssembly": {
@@ -60,16 +58,21 @@
               "target": "Package",
               "version": "[10.0.11, )"
             },
+            "Microsoft.DotNet.HotReload.WebAssembly.Browser": {
+              "target": "Package",
+              "version": "[10.0.112, )",
+              "autoReferenced": true
+            },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.11, )",
+              "version": "[10.0.12, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.11, )",
+              "version": "[10.0.12, )",
               "autoReferenced": true
             }
           },
@@ -87,7 +90,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[10.0.11, 10.0.11]"
+              "version": "[10.0.12, 10.0.12]"
             }
           ],
           "frameworkReferences": {
@@ -95,7 +98,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.112/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
