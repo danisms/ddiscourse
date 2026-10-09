@@ -7,6 +7,9 @@ bin/
 bin
 obj/
 obj
+app.db*
+data/migrations/
+data/migrations
 
 
 # Common node modules locations
