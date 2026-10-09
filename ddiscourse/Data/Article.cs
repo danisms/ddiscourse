@@ -41,17 +41,31 @@ public class Article
         return article;
     }
 
-    public async Task<List<Article>?> GetAllArticles(ApplicationDbContext Db, int BoardId)
+    public async Task<List<Article>> GetAllArticles(ApplicationDbContext Db, int? BoardId = null)
     {
-        List<Article>? articles = await Db.Articles.AsNoTracking()
-        .Include(a => a.Board)
-        .Include(a => a.Author)
-        .Include(a => a.Comments)
-        .Include(a => a.Ratings)
-        .AsSplitQuery()
-        .ToListAsync();
+        List<Article> articles;
 
-        articles?.RemoveAll(a => a.BoardId != BoardId);
+        if (BoardId is not null)
+        {
+            articles = await Db.Articles.AsNoTracking()
+            .Where(a => a.BoardId == BoardId)
+            .Include(a => a.Board)
+            .Include(a => a.Author)
+            .Include(a => a.Comments)
+            .Include(a => a.Ratings)
+            .AsSplitQuery()
+            .ToListAsync();
+        }
+        else
+        {
+            articles = await Db.Articles.AsNoTracking()
+            .Include(a => a.Board)
+            .Include(a => a.Author)
+            .Include(a => a.Comments)
+            .Include(a => a.Ratings)
+            .AsSplitQuery()
+            .ToListAsync();
+        }
 
         return articles;
     }

@@ -21,4 +21,10 @@ public class Board
         Board? board = await Db.Boards.AsNoTracking().FirstOrDefaultAsync(b => b.Id == Id);
         return board;
     }
+
+    public async Task<List<Board>> GetAllBoards(ApplicationDbContext Db)
+    {
+        List<Board> boards = await Db.Boards.AsNoTracking().ToListAsync();
+        return boards;
+    }
 }

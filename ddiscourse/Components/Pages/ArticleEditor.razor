@@ -81,6 +81,9 @@
 @code {
     [Parameter]
     public int? Id { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int BoardId { get; set; } = 0;
 
     private bool IsEdit => Id is not null;
     private bool loading = true;
@@ -90,6 +93,7 @@
     private List<Board> boards = new();
 
     private ArticleForm Form { get; set; } = new();
+
     private string? error;
     private bool saving;
 
@@ -213,5 +217,13 @@
             };
         }
         loading = false;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (BoardId > 0)
+        {
+            Form.BoardId = BoardId;
+        }
     }
 }

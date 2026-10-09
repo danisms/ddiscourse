@@ -59,7 +59,8 @@ else
                     {
                         <a class="btn btn-outline btn-sm" href="articles/@article.Id/edit">Edit</a>
                     }
-                    <button type="button" class="btn btn-outline btn-sm" @onclick="() => confirmingDelete = true">Delete</button>
+                    <button type="button" class="btn btn-outline btn-sm"
+                            @onclick="() => confirmingDelete = true">Delete</button>
                 </span>
             }
         </div>
@@ -69,155 +70,159 @@ else
             <div class="confirm">
                 <b>Delete this article and all its comments?</b>
                 <div class="row wrap">
-                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteArticleAsync">Yes, delete it</button>
-                    <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteArticleAsync">Yes,
+                        delete it</button>
+                        <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                    </div>
                 </div>
-            </div>
-        }
-
-        @* The body is HTML written by a user, so it is sanitized first. Never render article.Body directly. *@
-        <div class="prose prose-html">@((MarkupString)safeBody)</div>
-
-        @* ================= RATING ================= *@
-        <div class="card rate-row">
-            <span class="stars" aria-hidden="true">
-                @for (var n = 1; n <= 5; n++)
-                {
-                    @Utils.StarSvg(n <= Math.Round(average))
-                }
-            </span>
-            <b>@(ratingCount > 0 ? average.ToString("0.0") : "No ratings yet")</b>
-            @if (ratingCount > 0)
-            {
-                <span class="muted">@ratingCount @(ratingCount == 1 ? "rating" : "ratings")</span>
             }
 
-            @if (userId is null)
-            {
-                <a class="spacer link-btn" href="@LoginUrl">Sign in to rate</a>
-            }
-            else if (isAuthor)
-            {
-                <span class="spacer muted">You can't rate your own article</span>
-            }
-            else
-            {
-                <span class="spacer muted">@(myRating > 0 ? "Your rating:" : "Rate it:")</span>
-                <span class="stars">
+            @* The body is HTML written by a user, so it is sanitized first. Never render article.Body directly. *@
+            <div class="prose prose-html">@((MarkupString)safeBody)</div>
+
+            @* ================= RATING ================= *@
+            <div class="card rate-row">
+                <span class="stars" aria-hidden="true">
                     @for (var n = 1; n <= 5; n++)
                     {
-                        var star = n;
-                        <button type="button" class="star-btn" aria-label="Rate @star out of 5" disabled="@busy" @onclick="() => RateAsync(star)">
-                            @Utils.StarSvg(star <= myRating)
-                        </button>
+                        @Utils.StarSvg(n <= Math.Round(average))
                     }
                 </span>
-            }
-        </div>
-    </article>
-
-    @* ================= DISCUSSION ================= *@
-    <div class="page-head">
-        <h2 style="font-size:18px;font-weight:600">Discussion (@article.Comments.Count)</h2>
-    </div>
-
-    @if (userId is null)
-    {
-        <div class="card card-pad row wrap">
-            <span class="muted">Want to join the conversation?</span>
-            <a class="btn btn-sm" href="@LoginUrl">Sign in to comment</a>
-        </div>
-    }
-    else
-    {
-        <div class="card card-pad stack">
-            <label class="sr-only" for="newComment">Comment</label>
-            <textarea id="newComment" class="input input-sm" placeholder="Add to the discussion"
-                      @bind="newComment" @bind:event="oninput"></textarea>
-            @if (commentError is not null)
-            {
-                <p class="validation-message">@commentError</p>
-            }
-            <div>
-                <button type="button" class="btn btn-sm" disabled="@busy" @onclick="PostCommentAsync">Post comment</button>
-            </div>
-        </div>
-    }
-
-    @if (article.Comments.Count == 0)
-    {
-        <div class="card empty">
-            <h3>No comments yet</h3>
-            <p>Be the first to join the discussion.</p>
-        </div>
-    }
-    else
-    {
-        @foreach (var c in article.Comments)
-        {
-            var isMine = c.AuthorId == userId;
-
-            <div class="card comment">
-                <div class="comment-head">
-                    <span class="avatar" aria-hidden="true">@Utils.Initials(c.Author?.FullName)</span>
-                    <b>@c.Author?.FullName</b>
-                    <span class="muted">
-                        @c.CreatedAt.ToString("MMM d, yyyy")
-                        @if (c.EditedAt is not null)
-                        {
-                            <span> · edited</span>
-                        }
-                    </span>
-                </div>
-
-                @if (editingId == c.Id)
+                <b>@(ratingCount > 0 ? average.ToString("0.0") : "No ratings yet")</b>
+                @if (ratingCount > 0)
                 {
-                    <label class="sr-only" for="editComment">Edit comment</label>
-                    <textarea id="editComment" class="input input-sm" @bind="editText" @bind:event="oninput"></textarea>
-                    @if (commentError is not null)
-                    {
-                        <p class="validation-message">@commentError</p>
-                    }
-                    <div class="comment-actions">
-                        <button type="button" class="link-btn" disabled="@busy" @onclick="SaveEditAsync">Save</button>
-                        <button type="button" class="link-btn" @onclick="CancelEdit">Cancel</button>
-                    </div>
+                    <span class="muted">@ratingCount @(ratingCount == 1 ? "rating" : "ratings")</span>
+                }
+
+                @if (userId is null)
+                {
+                    <a class="spacer link-btn" href="@LoginUrl">Sign in to rate</a>
+                }
+                else if (isAuthor)
+                {
+                    <span class="spacer muted">You can't rate your own article</span>
                 }
                 else
                 {
-                    <p class="comment-body">@c.Body</p>
+                    <span class="spacer stars">
+                        @for (var n = 1; n <= 5; n++)
+                        {
+                            var star = n;
+                            <button type="button" class="star-btn" aria-label="Rate @star out of 5" disabled="@busy"
+                                    @onclick="() => RateAsync(star)">
+                                @Utils.StarSvg(star <= myRating)
+                            </button>
+                        }
+                    </span>
+                    <span class="muted">@(myRating > 0 ? "Your rating:" : "Rate it:")</span>
 
-                    @if (isMine || isStaff)
-                    {
-                        <div class="comment-actions">
-                            @if (isMine)
-                            {
-                                <button type="button" class="link-btn" @onclick="() => StartEdit(c)">Edit</button>
-                            }
-                            @if (confirmingCommentId == c.Id)
-                            {
-                                <span class="muted">Delete this comment?</span>
-                                <button type="button" class="link-btn danger" disabled="@busy" @onclick="() => DeleteCommentAsync(c.Id)">Yes, delete</button>
-                                <button type="button" class="link-btn" @onclick="() => confirmingCommentId = null">No</button>
-                            }
-                            else
-                            {
-                                <button type="button" class="link-btn danger" @onclick="() => confirmingCommentId = c.Id">Delete</button>
-                            }
-                        </div>
-                    }
                 }
             </div>
+        </article>
+
+        @* ================= DISCUSSION ================= *@
+        <div class="page-head">
+            <h2 style="font-size:18px;font-weight:600">Discussion (@article.Comments.Count)</h2>
+        </div>
+
+        @if (userId is null)
+        {
+            <div class="card card-pad row wrap">
+                <span class="muted">Want to join the conversation?</span>
+                <a class="btn btn-sm" href="@LoginUrl">Sign in to comment</a>
+            </div>
         }
-    }
-}
+        else
+        {
+            <div class="card card-pad stack">
+                <label class="sr-only" for="newComment">Comment</label>
+                <textarea id="newComment" class="input input-sm" placeholder="Add to the discussion" @bind="newComment"
+                          @bind:event="oninput"></textarea>
+                @if (commentError is not null)
+                {
+                    <p class="validation-message">@commentError</p>
+                }
+                <div>
+                    <button type="button" class="btn btn-sm" disabled="@busy" @onclick="PostCommentAsync">Post comment</button>
+                </div>
+            </div>
+        }
+
+        @if (article.Comments.Count == 0)
+        {
+            <div class="card empty">
+                <h3>No comments yet</h3>
+                <p>Be the first to join the discussion.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var c in article.Comments)
+            {
+                var isMine = c.AuthorId == userId;
+
+                <div class="card comment">
+                    <div class="comment-head">
+                        <span class="avatar" aria-hidden="true">@Utils.Initials(c.Author?.FullName)</span>
+                        <b>@c.Author?.FullName</b>
+                        <span class="muted">
+                            @c.CreatedAt.ToString("MMM d, yyyy")
+                            @if (c.EditedAt is not null)
+                            {
+                                <span> · edited</span>
+                            }
+                        </span>
+                    </div>
+
+                    @if (editingId == c.Id)
+                    {
+                        <label class="sr-only" for="editComment">Edit comment</label>
+                        <textarea id="editComment" class="input input-sm" @bind="editText" @bind:event="oninput"></textarea>
+                        @if (commentError is not null)
+                        {
+                            <p class="validation-message">@commentError</p>
+                        }
+                        <div class="comment-actions">
+                            <button type="button" class="link-btn" disabled="@busy" @onclick="SaveEditAsync">Save</button>
+                            <button type="button" class="link-btn" @onclick="CancelEdit">Cancel</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="comment-body">@c.Body</p>
+
+                        @if (isMine || isStaff)
+                        {
+                            <div class="comment-actions">
+                                @if (isMine)
+                                {
+                                    <button type="button" class="link-btn" @onclick="() => StartEdit(c)">Edit</button>
+                                }
+                                @if (confirmingCommentId == c.Id)
+                                {
+                                    <span class="muted">Delete this comment?</span>
+                                    <button type="button" class="link-btn danger" disabled="@busy" @onclick="() => DeleteCommentAsync(c.Id)">Yes,
+                                        delete</button>
+                                        <button type="button" class="link-btn" @onclick="() => confirmingCommentId = null">No</button>
+                                    }
+                            else
+                                    {
+                                        <button type="button" class="link-btn danger" @onclick="() => confirmingCommentId = c.Id">Delete</button>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            }
+        }
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
-    private Article? article;  // store the article query
-    private Article Article = new();  // article class to query from
+    private Article? article; // store the article query
+    private Article Article = new(); // article class to query from
 
     private bool loading = true;
     private bool busy; // true if a save is running (for disabling buttons)

@@ -186,4 +186,4 @@ C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddisco
 C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddiscourse\ddiscourse\bin\Debug\net10.0\AngleSharp.Css.dll
 C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddiscourse\ddiscourse\bin\Debug\net10.0\HtmlSanitizer.dll
 C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddiscourse\ddiscourse\bin\Debug\net10.0\Markdig.dll
-C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddiscourse\ddiscourse\obj\Debug\net10.0\compressed\7gc461o0fo-{0}-fbivetnmco-fbivetnmco.gz
+C:\Users\Danism\Documents\BYU-Idaho\CSE-325 - .NET - Software Development\ddiscourse\ddiscourse\obj\Debug\net10.0\compressed\f9u0f8c83k-{0}-s78lmboray-s78lmboray.gz

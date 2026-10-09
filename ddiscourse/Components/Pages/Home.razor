@@ -1,7 +1,185 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+@using System.Security.Claims
+@using ddiscourse.Data
 
-<h1>Hello, world!</h1>
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthProvider
 
-Welcome to your new app.
+<PageTitle>Home - DDiscourse</PageTitle>
+
+<section class="hero-container">
+    <div class="hero-img" aria-hidden="true"></div>
+    <div class="shade-dark-glass" aria-hidden="true"></div>
+    
+    <div class="hero">
+        <h2>Read • Write • Discuss</h2>
+        <p>
+            A simple social platform for discovering interests, sharing knowledge, and building communities through
+            focused
+            discussions
+        </p>
+    
+        <div class="row wrap">
+            @if (userId is null)
+            {
+                <a class="btn btn-light" href="account/register">Create account</a>
+                <a class="btn btn-outline-light" href="account/login">Sign in</a>
+            }
+            else
+            {
+                <h3>Welcome @(string.IsNullOrWhiteSpace(userFirstName) ? "" : userFirstName)</h3>
+                <a class="btn btn-outline-light spacer" href="articles/new">Write Article</a>
+            }
+        </div>
+    </div>
+</section>
+
+@if (loading)
+{
+    <p class="muted">Loading…</p>
+}
+else
+{
+    <p class="muted">@CountText</p>
+
+    <div class="filters filters-3">
+        <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="@($"Search {board?.Name}")" />
+
+        <select class="input" aria-label="Filter articles" @bind="filter" @bind:after="FilterBoard">
+            <option value="0">All Boards</option>
+            @foreach (Board board in allBoards)
+            {
+                <option value="@board.Id">@board.Name</option>
+            }
+        </select>
+
+        <select class="input" aria-label="Sort articles" @bind="sort" @bind:after="ApplyFilter">
+            <option value="@SortArticle.Newest">Newest</option>
+            <option value="@SortArticle.Top">Top rated</option>
+            <option value="@SortArticle.MostDiscussed">Most discussed</option>
+        </select>
+    </div>
+
+    @if (board is not null && searchText == string.Empty && filter != 0 && visible.Count == 0)
+    {
+        @* The board itself is empty *@
+        <div class="card empty">
+            <h3>Empty board</h3>
+            @if (userId is not null)
+            {
+                <p>Be the first to publish an article on @board.Name.</p>
+                <a class="btn" href="articles/new?boardid=@board.Id">Write article</a>
+            }
+            else
+            {
+                <p>There are no articles on @board.Name yet.</p>
+                <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew?boardid=@board.Id">Sign in to write an article</a>
+            }
+        </div>
+    }
+    else if (visible.Count == 0)
+    {
+        @* Articles exist, but none match the search. The search box stays on screen. *@
+        <div class="card empty">
+            <h3>No matches</h3>
+            <p>Nothing @(board is not null ? $"on {@board.Name}" : "") matches “@searchText.Trim()”.</p>
+            <button type="button" class="btn" @onclick="ClearSearch">Clear search</button>
+        </div>
+    }
+    else
+    {
+        @foreach (var article in visible)
+        {
+            <ArticleCard article="article" />
+        }
+    }
+}
+    
+
+
+@code {
+    private List<Article> allArticles = new(); // everything on this board, loaded once. Never edited by the search.
+    private List<Article> querrableArticles = new List<Article>(); // filtered articles
+    private List<Article> visible = new(); // what is shown after search + sort
+
+    bool querrableArticlesIsLoaded = false; // help to make sure quarableArticle loads only once from OnParameterSetAsync
+
+    private List<Board> allBoards = new();
+
+    private Board? board { get; set; }
+
+    private string searchText = "";
+    private SortArticle sort = SortArticle.Newest;
+    private int filter;
+    private string? userId;
+    private string? userFirstName;
+    private bool loading = true;
+
+    
+    private string CountText
+    {
+        get
+        {
+            var total = querrableArticles.Count;
+            if (total == 0) return "No articles";
+            if (!string.IsNullOrWhiteSpace(searchText)) return $"{visible.Count} of {total} articles";
+            return total == 1 ? "1 article" : $"{total} articles";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        searchText = "";
+        sort = SortArticle.Newest;
+
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        userFirstName = auth.User.FindFirstValue(ClaimTypes.GivenName);
+
+        // Load once. Include whatever ArticleCard shows (author, comment count, rating).
+        Article articleModel = new();
+        allArticles = await articleModel.GetAllArticles(Db);
+        if (!querrableArticlesIsLoaded)
+        {
+            querrableArticles = allArticles; // set querrable articles
+            querrableArticlesIsLoaded = true;
+        }
+
+        Board boardModel = new Board();
+        allBoards = await boardModel.GetAllBoards(Db);
+
+        ApplyFilter();
+        loading = false;
+    }
+
+    private void FilterBoard()
+    {
+        if (filter > 0) board = allBoards.Find(b => b.Id == filter) ?? null;
+        else board = null;
+
+        querrableArticles = allArticles;
+
+        if (board is not null)
+        {
+            IEnumerable<Article> query = allArticles;
+            querrableArticles = query.Where(a => a.BoardId == board.Id).ToList();
+        }
+
+        ApplyFilter(); // filter article with current querrable articles.
+    }
+
+    private void ApplyFilter()
+    {
+        visible = ArticleHelper.ApplyArticleFilter(querrableArticles, searchText, sort);
+    }
+
+
+    private void ClearSearch()
+    {
+        searchText = "";
+        ApplyFilter();
+    }
+}

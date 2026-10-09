@@ -284,6 +284,19 @@ button {
   font-size: 13px;
 }
 
+/* provide a dark background over a container with relative position */
+.shade-dark-glass {
+  position: absolute;
+  z-index: 1;
+  background: linear-gradient(135deg,
+      rgba(15, 11, 27, 0.50) 0%,
+      rgba(15, 11, 27, 0.30) 100%);
+
+  position: absolute;
+  inset: 0;
+  /* This is the shorthand for left/top/right/bottom : 0 */
+}
+
 /* ---------- Sidebar (desktop) ----------
    Order inside: .brand, .nav-item links, optional .btn (Write article),
    then .sidebar-user pinned to the bottom. */
@@ -340,7 +353,6 @@ button {
   margin-top: 12px;
 }
 
-/* "Write article" button */
 
 /* Bottom of the sidebar: user chip when signed in, Sign in / Create account for guests */
 .sidebar-user {
@@ -965,24 +977,70 @@ select.invalid {
 /* ==========================================================================
    11. HOME HERO BANNER (guests only)
    Show this above the feed only when nobody is signed in:
-   <section class="hero">
-     <h2>Read. Write. Discuss.</h2>
-     <p>Short description.</p>
-     <div class="row wrap">
-       <a class="btn btn-light">Create account</a>
-       <a class="btn btn-outline-light">Sign in</a>
-     </div>
+   <section class="hero-container">
+      <div class="hero-img" aria-hidden="true"></div>
+      <div class="shade-dark-glass" aria-hidden="true"></div>
+  
+      <div class="hero">
+        <h2>Read. Write. Discuss.</h2>
+        <p>Short description.</p>
+        <div class="row wrap">
+          <a class="btn btn-light">Create account</a>
+          <a class="btn btn-outline-light">Sign in</a>
+        </div>
+      </div>
    </section>
    ========================================================================== */
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 26px 28px;
-  border-radius: var(--radius-card);
+.hero-container {
+  position: relative;
+  width: 100%;
   background: var(--color-navy);
+  /* min-height: 300px; */
+  /* min-height so as to prevent text from overflowing on small screen */
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  /* clips images/shade to the rounded corners */
+  isolation: isolate;
+  /* keeps the z-index layers contained to this section */
+}
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  /* shorthand for top/right/bottom/left: 0 */
+}
+
+.hero-img {
+  z-index: 0;
+  background-image: url("/images/hero/home/discourse.webp");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center 30%;
+}
+
+.hero {
+  z-index: 2;
+  position: relative;
+  background: rgba(15, 11, 27, 0.65);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-card);
+  padding: 26px 28px;
+  margin: 16px;
+  /* so the card floats inside the image */
+}
+
+.hero h2,
+.hero h3 {
   color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.hero p {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .hero h2 {

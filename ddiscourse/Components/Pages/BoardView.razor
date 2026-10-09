@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 
 @using System.Security.Claims
-@using Microsoft.EntityFrameworkCore
 @using ddiscourse.Data
 
 @inject ApplicationDbContext Db
@@ -42,12 +41,12 @@ else
             @if (userId is not null)
             {
                 <p>Be the first to publish an article on @board.Name.</p>
-                <a class="btn" href="articles/new">Write article</a>
+                <a class="btn" href="articles/new?boardid=@board.Id">Write article</a>
             }
             else
             {
                 <p>There are no articles on @board.Name yet.</p>
-                <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew">Sign in to write an article</a>
+                <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew?boardid=@board.Id">Sign in to write an article</a>
             }
         </div>
     }
@@ -57,9 +56,9 @@ else
             <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="@($"Search {board.Name}")" />
 
             <select class="input" aria-label="Sort articles" @bind="sort" @bind:after="ApplyFilter">
-                <option value="newest">Newest</option>
-                <option value="top">Top rated</option>
-                <option value="discussed">Most discussed</option>
+                <option value="@SortArticle.Newest">Newest</option>
+                <option value="@SortArticle.Top">Top rated</option>
+                <option value="@SortArticle.MostDiscussed">Most discussed</option>
             </select>
         </div>
 
@@ -89,7 +88,7 @@ else
     private List<Article> allArticles = new(); // everything on this board, loaded once. Never edited by the search.
     private List<Article> visible = new(); // what is shown after search + sort
     private string searchText = "";
-    private string sort = "newest";
+    private SortArticle sort = SortArticle.Newest;
     private string? userId;
     private bool loading = true;
 
@@ -108,7 +107,7 @@ else
     {
         loading = true;
         searchText = "";
-        sort = "newest";
+        sort = SortArticle.Newest;
 
         var auth = await AuthProvider.GetAuthenticationStateAsync();
         userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -123,45 +122,18 @@ else
         else
         {
             // Load once. Include whatever ArticleCard shows (author, comment count, rating).
-            allArticles = await Db.Articles
-                .AsNoTracking()
-                .Where(a => a.BoardId == Id)
-                .Include(a => a.Board)
-                .Include(a => a.Author)
-                .Include(a => a.Comments)
-                .Include(a => a.Ratings)
-                .AsSplitQuery()
-                .OrderByDescending(a => a.CreatedAt)
-                .ToListAsync();
+            Article articleModel = new();
+            allArticles = await articleModel.GetAllArticles(Db, Id);
         }
 
         ApplyFilter();
         loading = false;
     }
 
-    // Builds `visible` from `allArticles`. allArticles itself is never changed, so clearing the search brings everything back.
+    // Builds `visible` from `allArticles`. allArticles itself is never changed, so clearing the search brings everything.
     private void ApplyFilter()
     {
-        IEnumerable<Article> query = allArticles;
-
-        var term = searchText.Trim();
-        if (term.Length > 0)
-        {
-            query = query.Where(a =>
-                a.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                (a.Author?.FullName ?? "").Contains(term, StringComparison.OrdinalIgnoreCase));
-        }
-
-        query = sort switch
-        {
-            "top" => query.OrderByDescending(a => a.Ratings.Count > 0 ? a.Ratings.Average(r => r.Value) : 0)
-                          .ThenByDescending(a => a.CreatedAt),
-            "discussed" => query.OrderByDescending(a => a.Comments.Count)
-                                .ThenByDescending(a => a.CreatedAt),
-            _ => query.OrderByDescending(a => a.CreatedAt)
-        };
-
-        visible = query.ToList();
+        visible = ArticleHelper.ApplyArticleFilter(allArticles, searchText, sort);
     }
 
     private void ClearSearch()

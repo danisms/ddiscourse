@@ -19,6 +19,8 @@ public class AppClaimsPrincipalFactory(
     {
         var identity = await base.GenerateClaimsAsync(user);
         identity.AddClaim(new Claim("full_name", user.FullName));
+        identity.AddClaim(new Claim(ClaimTypes.GivenName, user.FirstName));
+        
         return identity;
     }
 }
