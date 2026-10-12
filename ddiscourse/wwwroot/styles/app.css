@@ -702,6 +702,12 @@ button {
      </a>
    </div>
 
+    Main Boards Page: use .main-board-header for the page title and button
+    <div class="main-board-header">
+      <h1>Boards</h1>
+      <a class="btn spacer" href="boards/new">+ New Board</a>  -- staff user only button
+    </div>
+
    Board page: same pieces, but with .board-head and an h1 instead.
    ========================================================================== */
 .board-grid {
@@ -711,7 +717,7 @@ button {
 }
 
 .board-card {
-  display: block;
+  display: inline-block;
   overflow: hidden;
 }
 
@@ -732,6 +738,19 @@ button {
 .board-card h3 {
   font-size: 17px;
   font-weight: 600;
+}
+
+.main-board-header {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.main-board-header h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  display: inline-flex;
 }
 
 .board-head {

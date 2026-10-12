@@ -1,0 +1,80 @@
+@page "/Boards"
+
+@rendermode InteractiveServer
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using ddiscourse.Data
+
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthProvider
+
+<PageTitle>All Topics</PageTitle>
+
+<div class="main-board-header">
+    <h1>Boards</h1>
+    @if (isStaff)
+    {
+        <a class="btn spacer" href="boards/new">+ New Board</a>
+    }
+</div>
+
+@if (loading)
+{
+    <p class="muted">Loading…</p>
+}
+else if (boards is null)
+{
+    @if (isStaff)
+    {
+        <div class="card empty">
+            <h3>Topics Not Found</h3>
+            <p>Be the first to create a discussion topic</p>
+            <a class="btn" href="boards/add">Create Topic</a>
+        </div>
+    }
+    else
+    {
+        <div class="card empty">
+            <h3>Topics Not Found</h3>
+            <p>No topics yet.</p>
+            <a class="btn" href="">Back to Home</a>
+        </div>
+    }
+}
+else
+{
+    <span class="muted">Pick a topic to see its articles.</span>
+
+    <div class="board-grid">
+        @foreach (Board board_ in boards)
+        {
+            <BoardCard board="board_" />
+        }
+    </div>
+}
+
+
+
+@code {
+    private bool loading = true;
+    private string? userId;
+    private bool isStaff;
+
+    private List<Board>? boards;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        isStaff = auth.User.IsInRole("Admin") || auth.User.IsInRole("Moderator");
+
+
+        Board boardModel = new();
+        boards = await boardModel.GetAllBoards(Db);
+
+        loading = false;
+    }
+}
