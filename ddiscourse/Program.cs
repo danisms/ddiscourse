@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ddiscourse.Client.Pages;
 using ddiscourse.Components;
 using ddiscourse.Components.Account;
 using ddiscourse.Data;
