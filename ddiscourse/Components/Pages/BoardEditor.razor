@@ -1,0 +1,192 @@
+@page "/boards/new"
+@page "/boards/{Id:int}/edit"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ddiscourse.Data
+
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+
+@inject IJSRuntime JSRuntime
+
+
+<PageTitle>@(IsEdit ? "Edit Board" : "Create Board")</PageTitle>
+
+<div class="page-head">
+    <h1>@(IsEdit ? "Edit Board" : "Create Board")</h1>
+</div>
+
+@if (loading)
+{
+    <p class="muted">Loading...</p>
+} else if (notFound)
+{
+    <div class="card empty">
+        <h3>Board not found</h3>
+        <p>It may have been deleted, or you don't have permission to edit it.</p>
+        <a class="btn" href="">Back to home</a>
+    </div>
+} else
+{
+    <EditForm Model="Form" OnValidSubmit="SaveAsync" class="card card-pad stack">
+        <DataAnnotationsValidator />
+
+        @if (error is not null)
+        {
+            <div class="alert alert-error" role="alert">@error</div>
+        }
+
+        <div class="field">
+            <label class="sr-only" for="name">Name</label>
+            <InputText id="name" class="input input-name" @bind-Value="Form.Name" @oninput="UpdateNameCounter" maxlength="@NameMaxLength" placeholder="Board Name" />
+            <span class="hint">@nameCounter</span>
+            <ValidationMessage For="() => Form.Name" />
+        </div>
+
+        <div class="field">
+            <label for="descrtpion">Description</label>
+            <InputTextArea id="description" class="input" @bind-Value="Form.Description" placeholder="Add a description..." />
+            <span class="hint">@descriptionHint</span>
+            <ValidationMessage For="() => Form.Description" />
+        </div>
+
+        <div class="row">
+            <button class="btn btn-outline" @onclick="ConfirmCancel" @onclick:preventDefault="true">Cancel</button>
+            <button type="submit" class="btn btn-green spacer" disabled="@saving">
+                @(saving ? "Creating Board..." : IsEdit ? "Save changes" : "Create Board")
+            </button>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private bool IsEdit => Id is not null;
+    private bool loading = true;
+    private bool notFound;
+    private string? userId;
+
+    private BoardForm Form { get; set; } = new();
+
+    private string? error;
+    private bool saving;
+
+    private const int NameMaxLength = 100;
+    private string nameCounter => $"{Form.Name.Length} / {NameMaxLength}";
+
+    private const string descriptionHint = "It is optional to include a description for the board, but it'll be helpful for anyone that doesn't immediately recognize what to use it for.";
+
+    private void UpdateNameCounter(ChangeEventArgs e)
+    {
+        Form.Name = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task ConfirmCancel()
+    {
+        bool confirmed = false;
+
+        if (Form.Name.Trim() == string.Empty && Form.Description.Trim() == string.Empty)
+        {
+            confirmed = true;
+        } else
+        {
+            confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Discard changes?");
+        }
+
+        if (confirmed)
+        {
+            Nav.NavigateTo("", true);
+        }
+    }
+
+    private async Task SaveAsync()
+    {        
+        saving = true;
+        error = null;
+        Board board;
+
+        try
+        {
+            if (IsEdit)
+            {
+                board = (await Db.Boards.FirstOrDefaultAsync(b => b.Id == Id))!;
+                if (board is null)
+                {
+                    error = "This board could not be found or you don't have permission to edit it.";
+                    return;
+                }
+
+                board.Name = Form.Name.Trim();
+                board.Description = Form.Description.Trim();
+            } else
+            {
+                board = new Board
+                {
+                    Name = Form.Name.Trim(),
+                    Description = Form.Description.Trim()
+                };
+
+                Db.Boards.Add(board);  // Board Id is set once board is successfully added to db
+            }
+
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo($"/boards/{board.Id}");
+        } catch (Exception)
+        {
+            error = "Something went wrong while saving the board. Please try again.";
+        } finally
+        {
+            saving = false;
+        }
+    }
+
+    // NOTE: I decided to keep to the same formatting as the Article Editing process, so I'm keeping this here for the same reason as the ArticleForm class being on the ArticleEditor.razor page instead of the Article Model: allowing different validation rules and not having to worry about accidentally saving a property that shouldn't be saved.
+    private sealed class BoardForm
+    {
+        [Required(ErrorMessage = "Please give the board a name.")]
+        [StringLength(NameMaxLength, ErrorMessage = "Title must be 100 characters or fewer.")]
+        public string Name { get; set; } = "";
+
+        public string Description { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId is null)
+        {
+            Nav.NavigateTo($"Account/Login?ReturnUrl={Uri.EscapeDataString(Nav.Uri)}", forceLoad: true);
+            return;
+        }
+
+        if (IsEdit)
+        {
+            var board = await Db.Boards.AsNoTracking().FirstOrDefaultAsync(board => board.Id == Id);
+
+            if (board is null)
+            {
+                notFound = true;
+                loading = false;
+                return;
+            }
+
+            Form = new BoardForm
+            {
+                Name = board.Name,
+                Description = board.Description
+            };
+        }
+        loading = false;
+    }
+}

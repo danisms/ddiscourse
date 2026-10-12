@@ -38,6 +38,20 @@ copy the template below to create new report
 
 ---
 
+### Developer Name: Jacob Nielsen
+
+### Branch: boards-nielsen
+
+### Date: 2026-10-12
+
+### REPORT
+
+Fixed a bug in ddiscourse/Program.cs that prevented dotnet build from succeeding, added the page for Adding/Editing Boards, fixed a link that incorrectly led to boards/add instead of boards/new, and added the Edit button to Boards in the board list for Admins.
+
+---
+
+---
+
 ### Developer Name: Daniel C. Opute
 
 ### Branch: do-recreate-db-and-style-account-pages
