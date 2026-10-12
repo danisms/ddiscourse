@@ -1,4 +1,4 @@
-@page "/Boards"
+@page "/boards"
 
 @rendermode InteractiveServer
 
@@ -13,7 +13,7 @@
 
 <div class="main-board-header">
     <h1>Boards</h1>
-    @if (isStaff)
+    @if (isAdmin)
     {
         <a class="btn spacer" href="boards/new">+ New Board</a>
     }
@@ -25,12 +25,12 @@
 }
 else if (boards is null)
 {
-    @if (isStaff)
+    @if (isAdmin)
     {
         <div class="card empty">
             <h3>Topics Not Found</h3>
             <p>Be the first to create a discussion topic</p>
-            <a class="btn" href="boards/add">Create Topic</a>
+            <a class="btn" href="boards/new">Create Topic</a>
         </div>
     }
     else
@@ -49,7 +49,7 @@ else
     <div class="board-grid">
         @foreach (Board board_ in boards)
         {
-            <BoardCard board="board_" />
+            <BoardCard board="board_" isAdmin="isAdmin" />
         }
     </div>
 }
@@ -59,6 +59,7 @@ else
 @code {
     private bool loading = true;
     private string? userId;
+    private bool isAdmin;
     private bool isStaff;
 
     private List<Board>? boards;
@@ -69,7 +70,8 @@ else
 
         var auth = await AuthProvider.GetAuthenticationStateAsync();
         userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        isStaff = auth.User.IsInRole("Admin") || auth.User.IsInRole("Moderator");
+        isAdmin = auth.User.IsInRole("Admin");
+        isStaff = isAdmin || auth.User.IsInRole("Moderator");
 
 
         Board boardModel = new();
