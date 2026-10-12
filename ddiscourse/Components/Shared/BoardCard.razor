@@ -1,0 +1,29 @@
+@using ddiscourse.Data
+
+@if (board is not null)
+{
+    <a class="card board-card c@(board.Id % 6)" href="/boards/@board.Id">
+        <div class="band"></div>
+        <div class="body">
+            <h3>@board.Name</h3>
+            <p class="muted">
+                @if (board.Articles.Any())
+                {
+                    <text>@(board.Articles.Count == 1 ? "1 article" : $"{board.Articles.Count} articles")</text>;
+                }
+                else
+                {
+                    <text>No articles yet</text>;
+                }
+            </p>
+        </div>
+    </a>
+}
+
+
+@code
+{
+    [Parameter]
+    public Board? board { get; set; }
+
+}

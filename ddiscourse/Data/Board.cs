@@ -24,7 +24,7 @@ public class Board
 
     public async Task<List<Board>> GetAllBoards(ApplicationDbContext Db)
     {
-        List<Board> boards = await Db.Boards.AsNoTracking().ToListAsync();
+        List<Board> boards = await Db.Boards.AsNoTracking().Include(b => b.Articles).ToListAsync();
         return boards;
     }
 }
