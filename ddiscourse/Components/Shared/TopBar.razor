@@ -5,12 +5,18 @@
 <span class="spacer">
     <AuthorizeView>
         <Authorized>
-            <a href="Account/Manage" aria-label="Account">
-                <span class="avatar c0" aria-hidden="true">@UserDisplay.Initials(context.User)</span>
-            </a>
+            <div class="row">
+                <HelpButton content="Help" />
+                <a href="Account/Manage" aria-label="Account">
+                    <span class="avatar c0" aria-hidden="true">@UserDisplay.Initials(context.User)</span>
+                </a>
+            </div>
         </Authorized>
         <NotAuthorized>
-            <a class="btn btn-sm" href="Account/Login">Sign in</a>
+            <div class="row">
+                <HelpButton content="Help" />
+                <a class="btn btn-sm" href="Account/Login">Sign in</a>
+            </div>
         </NotAuthorized>
     </AuthorizeView>
 </span>

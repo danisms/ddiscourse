@@ -24,4 +24,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\docs\USER-GUIDE.md" Link="docs\USER-GUIDE.md">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </Content>
+  </ItemGroup>
+
 </Project>
