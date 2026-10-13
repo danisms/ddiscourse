@@ -1,0 +1,43 @@
+@page "/help"
+@using ddiscourse.Data
+@using Ganss.Xss
+
+@inject IHtmlSanitizer Sanitizer
+@inject IWebHostEnvironment Env
+
+<PageTitle>Help - D Discourse</PageTitle>
+
+<div class="page">
+    <div class="card card-pad">
+        @if (content is null)
+        {
+            <p class="muted">Loading…</p>
+        }
+        else
+        {
+            <div class="prose prose-html">
+                @((MarkupString)content)
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string? content;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var path = Path.Combine(Env.ContentRootPath, "../docs", "USER-GUIDE.md");
+
+        if (!File.Exists(path))
+        {
+            content = "<p>The help guide isn't available right now.</p>";
+            return;
+        }
+
+        var markdown = await File.ReadAllTextAsync(path);
+
+
+        content = ArticleContent.ToSafeHtml(markdown, Sanitizer);
+    }
+}

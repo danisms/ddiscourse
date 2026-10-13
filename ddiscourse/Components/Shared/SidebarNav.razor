@@ -4,12 +4,18 @@
 
 <a class="brand" href=""><img src="logo.png" alt="" />Discourse</a>
 
-<NavLink class="nav-item" href="" Match="NavLinkMatch.All"><Icon Name="home" />Home</NavLink>
-<NavLink class="nav-item" href="boards"><Icon Name="boards" />Boards</NavLink>
+<NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+    <Icon Name="home" />Home
+</NavLink>
+<NavLink class="nav-item" href="boards">
+    <Icon Name="boards" />Boards
+</NavLink>
 
 <AuthorizeView>
     <Authorized>
-        <NavLink class="nav-item" href="Account/Manage"><Icon Name="user" />Account</NavLink>
+        <NavLink class="nav-item" href="Account/Manage">
+            <Icon Name="user" />Account
+        </NavLink>
         <NavLink class="btn" href="articles/new">Write article</NavLink>
 
         <div class="sidebar-user">
@@ -17,6 +23,7 @@
                 <span class="avatar avatar-lg c0" aria-hidden="true">@UserDisplay.Initials(context.User)</span>
                 <span>@UserDisplay.Name(context.User)<small>@UserDisplay.Role(context.User)</small></span>
             </div>
+            <HelpButton content="Help" />
             <SignOutButton />
         </div>
     </Authorized>
@@ -24,6 +31,7 @@
         <div class="sidebar-user">
             <a class="btn btn-block" href="Account/Login">Sign in</a>
             <a class="btn btn-outline btn-block" href="Account/Register">Create account</a>
+            <HelpButton content="Help" />
         </div>
     </NotAuthorized>
 </AuthorizeView>

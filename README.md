@@ -11,6 +11,7 @@ The goal is to provide a simple place for people to explore their interests, sha
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Documentation](#documentation)
 - [Core Concepts](#core-concepts)
 - [Features and Scope](#features-and-scope)
 - [User Access and Permissions](#user-access-and-permissions)
@@ -26,6 +27,10 @@ The goal is to provide a simple place for people to explore their interests, sha
 D Discourse is designed for people who want to explore a specific interest, hobby, field of study, or community in more depth. For example, students can discuss what they are learning, professionals can share knowledge, and hobbyists can exchange ideas and feedback with people who share their interests.
 
 The platform combines the openness of social media with the organized, topic-focused structure of a forum. Boards help keep content grouped by subject, while articles and comments provide a place for discussion.
+
+## Documentation
+
+- **[User Guide](docs/USER-GUIDE.md):** how to browse boards, create an account, publish articles, and join discussions.
 
 ## Core Concepts
 
@@ -171,8 +176,9 @@ The project team consists of:
 ## Project Links
 
 - **GitHub Repository:** [danisms/cse325-group-project](https://github.com/danisms/ddiscourse)
-- **Trello Board:** [CSE 325 Group Project](https://trello.com/b/POyUX8NEL)
+- **Trello Board:** [CSE 325 Group Project](https://trello.com/b/POyUX8NE/cse325-group-project)
 - **Deployed Application:** [ddiscourse.runasp.net](https://ddiscourse.runasp.net)
+- **User Guide:** [USER-GUIDE](docs/USER-GUIDE.md)
 
 ## Project Information
 
