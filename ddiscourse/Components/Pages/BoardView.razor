@@ -24,7 +24,17 @@ else if (board is null)
 }
 else
 {
-    <p class="crumbs"><a href="boards">← Back to Boards</a></p>
+    <div class="crumbs row">
+        <a href="boards">← Back to Boards</a>
+        @if (isAdmin)
+        {
+            <span class="spacer">
+                <a class="btn btn-outline btn-sm spacer" href="boards/@board.Id/edit">Edit</a>
+                <button type="button" class="btn btn-outline btn-sm spacer"
+                        @onclick="() => confirmingDelete = true">Delete</button>
+            </span>
+        }
+    </div>
 
     <div class="card board-head c@(Id % 6)">
         <div class="band"></div>
@@ -32,72 +42,67 @@ else
             <h1>@board.Name</h1>
             <p class="muted">@CountText</p>
         </div>
-        @if (isAdmin)
-        {
-            <span class="spacer row">
-                <a class="btn btn-outline btn-sm" href="articles/@board.Id/edit">Edit</a>
-                <button type="button" class="btn btn-outline btn-sm" @onclick="() => confirmingDelete = true">Delete</button>
-            </span>
-        }
+        
         @if (confirmingDelete)
         {
             <div class="confirm">
                 <b>Delete this board, all its articles, and all their comments?</b>
                 <div class="row wrap">
-                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteBoardAsync">Yes, delete it</button>
-                    <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteBoardAsync">Yes, delete
+                        it</button>
+                        <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
-
-    @if (allArticles.Count == 0)
-    {
-        @* The board itself is empty *@
-        <div class="card empty">
-            <h3>Empty board</h3>
-            @if (userId is not null)
-            {
-                <p>Be the first to publish an article on @board.Name.</p>
-                <a class="btn" href="articles/new?boardid=@board.Id">Write article</a>
-            }
-            else
-            {
-                <p>There are no articles on @board.Name yet.</p>
-                <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew?boardid=@board.Id">Sign in to write an article</a>
             }
         </div>
-    }
-    else
-    {
-        <div class="filters filters-2">
-            <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="@($"Search {board.Name}")" />
 
-            <select class="input" aria-label="Sort articles" @bind="sort" @bind:after="ApplyFilter">
-                <option value="@SortArticle.Newest">Newest</option>
-                <option value="@SortArticle.Top">Top rated</option>
-                <option value="@SortArticle.MostDiscussed">Most discussed</option>
-            </select>
-        </div>
-
-        @if (visible.Count == 0)
+        @if (allArticles.Count == 0)
         {
-            @* Articles exist, but none match the search. The search box stays on screen. *@
+            @* The board itself is empty *@
             <div class="card empty">
-                <h3>No matches</h3>
-                <p>Nothing on @board.Name matches “@searchText.Trim()”.</p>
-                <button type="button" class="btn btn-outline" @onclick="ClearSearch">Clear search</button>
+                <h3>Empty board</h3>
+                @if (userId is not null)
+                {
+                    <p>Be the first to publish an article on @board.Name.</p>
+                    <a class="btn" href="articles/new?boardid=@board.Id">Write article</a>
+                }
+                else
+                {
+                    <p>There are no articles on @board.Name yet.</p>
+                    <a class="btn" href="Account/Login?ReturnUrl=%2Farticles%2Fnew?boardid=@board.Id">Sign in to write an article</a>
+                }
             </div>
         }
         else
         {
-            @foreach (var article in visible)
+            <div class="filters filters-2">
+                <ArticleSearch @bind-Value="searchText" @bind-Value:after="ApplyFilter" Placeholder="@($"Search {board.Name}")" />
+
+                <select class="input" aria-label="Sort articles" @bind="sort" @bind:after="ApplyFilter">
+                    <option value="@SortArticle.Newest">Newest</option>
+                    <option value="@SortArticle.Top">Top rated</option>
+                    <option value="@SortArticle.MostDiscussed">Most discussed</option>
+                </select>
+            </div>
+
+            @if (visible.Count == 0)
             {
-                <ArticleCard article="article" />
+                @* Articles exist, but none match the search. The search box stays on screen. *@
+                <div class="card empty">
+                    <h3>No matches</h3>
+                    <p>Nothing on @board.Name matches “@searchText.Trim()”.</p>
+                    <button type="button" class="btn btn-outline" @onclick="ClearSearch">Clear search</button>
+                </div>
+            }
+            else
+            {
+                @foreach (var article in visible)
+                {
+                    <ArticleCard article="article" />
+                }
             }
         }
     }
-}
 
 @code {
     [Parameter] public int Id { get; set; }
@@ -160,12 +165,14 @@ else
             // Only an Admin can delete boards. Doing so deletes their articles, and deletes those articles' comments.
             Db.Boards.Remove(board!);
             await Db.SaveChangesAsync();
-            Nav.NavigateTo("");
+            Nav.NavigateTo("boards");
         }
         finally
         {
             busy = false;
         }
+
+        return;
     }
 
     // Builds `visible` from `allArticles`. allArticles itself is never changed, so clearing the search brings everything.

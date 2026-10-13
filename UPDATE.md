@@ -38,6 +38,23 @@ copy the template below to create new report
 
 ---
 
+### Developer Name: Daniel C. Opute
+
+### Branch: main
+
+### Date: 13-10-2026
+
+### REPORT
+
+- **Fix:** Updated the broken edit link in `BoardView.razor` from `Articles/{id}/edit` to `Boards/{id}/edit`.
+- **Fix:** Added the missing `return` keyword to `DeleteBoardAsync` to resolve a board deletion error.
+- **Docs:** Added a comment explaining the purpose and origin of the project's passkey.
+- **UI:** Moved the **Edit** and **Delete** buttons from the bottom of the `BoardView` header to the top of the board.
+
+---
+
+---
+
 ### Developer Name: Jacob Nielsen
 
 ### Branch: boards-nielsen

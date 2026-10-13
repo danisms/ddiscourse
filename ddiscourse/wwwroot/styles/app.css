@@ -1119,7 +1119,7 @@ select.invalid {
   color: var(--color-text-muted);
 }
 
-.crumbs a {
+.crumbs > a {
   display: inline-block;
   padding: 6px 0;
   color: var(--color-primary);
