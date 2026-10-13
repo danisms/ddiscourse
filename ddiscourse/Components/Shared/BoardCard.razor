@@ -16,10 +16,6 @@
                     <text>No articles yet</text>;
                 }
             </p>
-            @if (isAdmin)
-            {
-                <a class="btn btn-outline btn-sm" href="boards/@board.Id/edit">Edit</a>
-            }
         </div>
     </a>
 }
@@ -29,7 +25,4 @@
 {
     [Parameter]
     public Board? board { get; set; }
-    [Parameter]
-    public bool isAdmin { get; set; }
-
 }

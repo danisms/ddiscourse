@@ -5,6 +5,7 @@
 @using ddiscourse.Data
 
 @inject ApplicationDbContext Db
+@inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 
 <PageTitle>@(board is null ? "Board not found" : $"Discourse on {board.Name}")</PageTitle>
@@ -31,6 +32,23 @@ else
             <h1>@board.Name</h1>
             <p class="muted">@CountText</p>
         </div>
+        @if (isAdmin)
+        {
+            <span class="spacer row">
+                <a class="btn btn-outline btn-sm" href="articles/@board.Id/edit">Edit</a>
+                <button type="button" class="btn btn-outline btn-sm" @onclick="() => confirmingDelete = true">Delete</button>
+            </span>
+        }
+        @if (confirmingDelete)
+        {
+            <div class="confirm">
+                <b>Delete this board, all its articles, and all their comments?</b>
+                <div class="row wrap">
+                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteBoardAsync">Yes, delete it</button>
+                    <button type="button" class="link-btn" @onclick="() => confirmingDelete = false">Cancel</button>
+                </div>
+            </div>
+        }
     </div>
 
     @if (allArticles.Count == 0)
@@ -90,7 +108,10 @@ else
     private string searchText = "";
     private SortArticle sort = SortArticle.Newest;
     private string? userId;
+    private bool isAdmin;
     private bool loading = true;
+    private bool busy;
+    private bool confirmingDelete;
 
     private string CountText
     {
@@ -111,6 +132,7 @@ else
 
         var auth = await AuthProvider.GetAuthenticationStateAsync();
         userId = auth.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        isAdmin = auth.User.IsInRole("Admin");
 
         Board boardModel = new();
         board = await boardModel.GetBoard(Db, Id);
@@ -128,6 +150,22 @@ else
 
         ApplyFilter();
         loading = false;
+    }
+
+    private async Task DeleteBoardAsync()
+    {
+        busy = true;
+        try
+        {
+            // Only an Admin can delete boards. Doing so deletes their articles, and deletes those articles' comments.
+            Db.Boards.Remove(board!);
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo("");
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     // Builds `visible` from `allArticles`. allArticles itself is never changed, so clearing the search brings everything.
