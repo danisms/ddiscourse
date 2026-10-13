@@ -1347,6 +1347,8 @@ select.invalid {
 
 .info-list dd {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .danger-zone {
@@ -1452,7 +1454,27 @@ select.invalid {
   display: flex;
   gap: 4px;
   overflow-x: auto;
+  min-width: 0;
+  overscroll-behavior-x: contain;
   border-bottom: 1px solid var(--color-border);
+}
+
+.account-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.account-page > * {
+  min-width: 0;
+}
+
+.account-page .card {
+  width: 100%;
 }
 
 .subnav a {
@@ -1566,7 +1588,11 @@ ol.steps {
 /* ==MOBILE-START== */
 @media (max-width: 768px) {
   .app {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app > div {
+    min-width: 0;
   }
 
   .sidebar {
@@ -1663,8 +1689,8 @@ ol.steps {
   }
 
   .info-list {
-    grid-template-columns: 1fr;
-    gap: 2px;
+    grid-template-columns: minmax(6.5rem, 35%) minmax(0, 1fr);
+    gap: 6px 12px;
   }
 }
 
