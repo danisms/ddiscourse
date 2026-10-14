@@ -27,7 +27,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var path = Path.Combine(Env.ContentRootPath, "../docs", "USER-GUIDE.md");
+        var path = Path.Combine(Env.ContentRootPath, "docs", "USER-GUIDE.md");
 
         if (!File.Exists(path))
         {

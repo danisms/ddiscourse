@@ -18,7 +18,7 @@ public static class SeedData
             if (!await roles.RoleExistsAsync(role))
                 await roles.CreateAsync(new IdentityRole(role));
 
-        const string adminEmail = "admin@discourse.local";
+        const string adminEmail = "admin@ddiscourse.net";
         if (await users.FindByEmailAsync(adminEmail) is null)
         {
             var admin = new ApplicationUser
